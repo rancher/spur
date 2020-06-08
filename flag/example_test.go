@@ -7,10 +7,11 @@ package flag_test
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/rancher/spur/flag"
 )
 
 // Example 1: A single string flag called "species" with default value "gopher".
@@ -42,7 +43,7 @@ func (i *interval) String() string {
 // Set is the method to set the flag value, part of the flag.Value interface.
 // Set's argument is a string to be parsed to set the flag.
 // It's a comma-separated list, so we split it.
-func (i *interval) Set(value string) error {
+func (i *interval) Set(value interface{}) error {
 	// If we wanted to allow the flag to be set multiple times,
 	// accumulating values, we would delete this if statement.
 	// That would permit usages such as
@@ -51,7 +52,7 @@ func (i *interval) Set(value string) error {
 	if len(*i) > 0 {
 		return errors.New("interval flag already set")
 	}
-	for _, dt := range strings.Split(value, ",") {
+	for _, dt := range strings.Split(value.(string), ",") {
 		duration, err := time.ParseDuration(dt)
 		if err != nil {
 			return err

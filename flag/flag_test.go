@@ -6,9 +6,7 @@ package flag_test
 
 import (
 	"bytes"
-	. "flag"
 	"fmt"
-	"internal/testenv"
 	"io"
 	"io/ioutil"
 	"os"
@@ -19,6 +17,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	. "github.com/rancher/spur/flag"
 )
 
 func boolString(s string) string {
@@ -235,8 +235,8 @@ func (f *flagVar) String() string {
 	return fmt.Sprint([]string(*f))
 }
 
-func (f *flagVar) Set(value string) error {
-	*f = append(*f, value)
+func (f *flagVar) Set(value interface{}) error {
+	*f = append(*f, value.(string))
 	return nil
 }
 
@@ -276,8 +276,8 @@ func (b *boolFlagVar) String() string {
 	return fmt.Sprintf("%d", b.count)
 }
 
-func (b *boolFlagVar) Set(value string) error {
-	if value == "true" {
+func (b *boolFlagVar) Set(value interface{}) error {
+	if value.(string) == "true" {
 		b.count++
 	}
 	return nil
@@ -394,7 +394,7 @@ const defaultOutput = `  -A	for bootstrapping, allow 'any' type
     	issue 23543 (default "0")
   -F number
     	a non-zero number (default 2.7)
-  -G float
+  -G float64
     	a float that defaults to zero
   -M string
     	a multiline
@@ -549,8 +549,6 @@ func TestRangeError(t *testing.T) {
 }
 
 func TestExitCode(t *testing.T) {
-	testenv.MustHaveExec(t)
-
 	magic := 123
 	if os.Getenv("GO_CHILD_FLAG") != "" {
 		fs := NewFlagSet("test", ExitOnError)

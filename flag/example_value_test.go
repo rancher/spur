@@ -5,9 +5,10 @@
 package flag_test
 
 import (
-	"flag"
 	"fmt"
 	"net/url"
+
+	"github.com/rancher/spur/flag"
 )
 
 type URLValue struct {
@@ -21,8 +22,8 @@ func (v URLValue) String() string {
 	return ""
 }
 
-func (v URLValue) Set(s string) error {
-	if u, err := url.Parse(s); err != nil {
+func (v URLValue) Set(s interface{}) error {
+	if u, err := url.Parse(s.(string)); err != nil {
 		return err
 	} else {
 		*v.URL = *u
