@@ -44,6 +44,11 @@ func main() {
 		{
 			Name:   "check-binary-size",
 			Action: checkBinarySizeActionFunc,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name: "tags",
+				},
+			},
 		},
 	}
 
@@ -72,9 +77,9 @@ func TestActionFunc(c *cli.Context) error {
 		var packageName string
 
 		if pkg == "cli" {
-			packageName = "github.com/urfave/cli/v2"
+			packageName = "github.com/rancher/spur/cli"
 		} else {
-			packageName = fmt.Sprintf("github.com/urfave/cli/v2/%s", pkg)
+			packageName = fmt.Sprintf("github.com/rancher/spur/cli/%s", pkg)
 		}
 
 		coverProfile := fmt.Sprintf("--coverprofile=%s.coverprofile", pkg)
@@ -193,8 +198,8 @@ func checkBinarySizeActionFunc(c *cli.Context) (err error) {
 		cliBuiltFilePath     = "./internal/example-cli/built-example"
 		helloSourceFilePath  = "./internal/example-hello-world/example-hello-world.go"
 		helloBuiltFilePath   = "./internal/example-hello-world/built-example"
-		desiredMinBinarySize = 2.0
-		desiredMaxBinarySize = 2.1
+		desiredMinBinarySize = 1.5
+		desiredMaxBinarySize = 2.5
 		badNewsEmoji         = "🚨"
 		goodNewsEmoji        = "✨"
 		checksPassedEmoji    = "✅"
@@ -202,13 +207,13 @@ func checkBinarySizeActionFunc(c *cli.Context) (err error) {
 	)
 
 	// get cli example size
-	cliSize, err := getSize(cliSourceFilePath, cliBuiltFilePath)
+	cliSize, err := getSize(cliSourceFilePath, cliBuiltFilePath, c.String("tags"))
 	if err != nil {
 		return err
 	}
 
 	// get hello world size
-	helloSize, err := getSize(helloSourceFilePath, helloBuiltFilePath)
+	helloSize, err := getSize(helloSourceFilePath, helloBuiltFilePath, c.String("tags"))
 	if err != nil {
 		return err
 	}
@@ -270,9 +275,9 @@ func checkBinarySizeActionFunc(c *cli.Context) (err error) {
 	return nil
 }
 
-func getSize(sourcePath string, builtPath string) (size int64, err error) {
+func getSize(sourcePath string, builtPath string, tags string) (size int64, err error) {
 	// build example binary
-	err = runCmd("go", "build", "-o", builtPath, "-ldflags", "-s -w", sourcePath)
+	err = runCmd("go", "build", "-tags", tags, "-o", builtPath, "-ldflags", "-s -w", sourcePath)
 	if err != nil {
 		fmt.Println("issue getting size for example binary")
 		return 0, err
