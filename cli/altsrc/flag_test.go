@@ -274,19 +274,19 @@ func runTest(t *testing.T, test testApplyInputSource) *cli.Context {
 	set := flag.NewFlagSet(test.FlagSetName, flag.ContinueOnError)
 	c := cli.NewContext(nil, set, nil)
 	if test.EnvVarName != "" && test.EnvVarValue != "" {
-		_ = os.Setenv(test.EnvVarName, test.EnvVarValue)
+		os.Setenv(test.EnvVarName, test.EnvVarValue)
 		defer os.Setenv(test.EnvVarName, "")
 	}
 
-	_ = test.Flag.Apply(set)
+	test.Flag.Apply(set)
 	if test.ContextValue != nil {
 		f := set.Lookup(test.FlagName)
 		f.Value = test.ContextValue
 	}
 	if test.ContextValueString != "" {
-		_ = set.Set(test.FlagName, test.ContextValueString)
+		set.Set(test.FlagName, test.ContextValueString)
 	}
-	_ = test.Flag.ApplyInputSourceValue(c, inputSource)
+	test.Flag.ApplyInputSourceValue(c, inputSource)
 
 	return c
 }

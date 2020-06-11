@@ -109,9 +109,9 @@ func HandleExitCoder(err error) {
 	if exitErr, ok := err.(ExitCoder); ok {
 		if err.Error() != "" {
 			if _, ok := exitErr.(ErrorFormatter); ok {
-				_, _ = fmt.Fprintf(ErrWriter, "%+v\n", err)
+				fmt.Fprintf(ErrWriter, "%+v\n", err)
 			} else {
-				_, _ = fmt.Fprintln(ErrWriter, err)
+				fmt.Fprintln(ErrWriter, err)
 			}
 		}
 		OsExiter(exitErr.ExitCode())

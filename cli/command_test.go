@@ -3,11 +3,12 @@ package cli
 import (
 	"bytes"
 	"errors"
-	"github.com/rancher/spur/flag"
 	"fmt"
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/rancher/spur/flag"
 )
 
 func TestCommandFlagParsing(t *testing.T) {
@@ -28,7 +29,7 @@ func TestCommandFlagParsing(t *testing.T) {
 	for _, c := range cases {
 		app := &App{Writer: ioutil.Discard}
 		set := flag.NewFlagSet("test", 0)
-		_ = set.Parse(c.testArgs)
+		set.Parse(c.testArgs)
 
 		context := NewContext(app, set, nil)
 

@@ -21,7 +21,7 @@ var helpCommand = &Command{
 			return ShowCommandHelp(c, args.First())
 		}
 
-		_ = ShowAppHelp(c)
+		ShowAppHelp(c)
 		return nil
 	},
 }
@@ -66,7 +66,7 @@ var VersionPrinter = printVersion
 
 // ShowAppHelpAndExit - Prints the list of subcommands for the app and exits with exit code.
 func ShowAppHelpAndExit(c *Context, exitCode int) {
-	_ = ShowAppHelp(c)
+	ShowAppHelp(c)
 	os.Exit(exitCode)
 }
 
@@ -104,11 +104,11 @@ func printCommandSuggestions(commands []*Command, writer io.Writer) {
 		}
 		if os.Getenv("_CLI_ZSH_AUTOCOMPLETE_HACK") == "1" {
 			for _, name := range command.Names() {
-				_, _ = fmt.Fprintf(writer, "%s:%s\n", name, command.Usage)
+				fmt.Fprintf(writer, "%s:%s\n", name, command.Usage)
 			}
 		} else {
 			for _, name := range command.Names() {
-				_, _ = fmt.Fprintf(writer, "%s\n", name)
+				fmt.Fprintf(writer, "%s\n", name)
 			}
 		}
 	}
@@ -153,7 +153,7 @@ func printFlagSuggestions(lastArg string, flags []Flag, writer io.Writer) {
 			// match if last argument matches this flag and it is not repeated
 			if strings.HasPrefix(name, cur) && cur != name && !cliArgContains(name) {
 				flagCompletion := fmt.Sprintf("%s%s", strings.Repeat("-", count), name)
-				_, _ = fmt.Fprintln(writer, flagCompletion)
+				fmt.Fprintln(writer, flagCompletion)
 			}
 		}
 	}
@@ -181,7 +181,7 @@ func DefaultCompleteWithFlags(cmd *Command) func(c *Context) {
 
 // ShowCommandHelpAndExit - exits with code after showing help
 func ShowCommandHelpAndExit(c *Context, command string, code int) {
-	_ = ShowCommandHelp(c, command)
+	ShowCommandHelp(c, command)
 	os.Exit(code)
 }
 
@@ -233,7 +233,7 @@ func ShowVersion(c *Context) {
 }
 
 func printVersion(c *Context) {
-	_, _ = fmt.Fprintf(c.App.Writer, "%v version %v\n", c.App.Name, c.App.Version)
+	fmt.Fprintf(c.App.Writer, "%v version %v\n", c.App.Name, c.App.Version)
 }
 
 // ShowCompletions prints the lists of commands within a given context
@@ -277,11 +277,11 @@ func printHelpCustom(out io.Writer, templ string, data interface{}, customFuncs 
 		// If the writer is closed, t.Execute will fail, and there's nothing
 		// we can do to recover.
 		if os.Getenv("CLI_TEMPLATE_ERROR_DEBUG") != "" {
-			_, _ = fmt.Fprintf(ErrWriter, "CLI TEMPLATE ERROR: %#v\n", err)
+			fmt.Fprintf(ErrWriter, "CLI TEMPLATE ERROR: %#v\n", err)
 		}
 		return
 	}
-	_ = w.Flush()
+	w.Flush()
 }
 
 func printHelp(out io.Writer, templ string, data interface{}) {
@@ -310,7 +310,7 @@ func checkHelp(c *Context) bool {
 
 func checkCommandHelp(c *Context, name string) bool {
 	if c.Bool("h") || c.Bool("help") {
-		_ = ShowCommandHelp(c, name)
+		ShowCommandHelp(c, name)
 		return true
 	}
 
@@ -319,7 +319,7 @@ func checkCommandHelp(c *Context, name string) bool {
 
 func checkSubcommandHelp(c *Context) bool {
 	if c.Bool("h") || c.Bool("help") {
-		_ = ShowSubcommandHelp(c)
+		ShowSubcommandHelp(c)
 		return true
 	}
 

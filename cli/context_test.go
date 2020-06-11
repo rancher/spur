@@ -141,7 +141,7 @@ func TestContext_Args(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	set.Bool("myflag", false, "doc")
 	c := NewContext(nil, set, nil)
-	_ = set.Parse([]string{"--myflag", "bat", "baz"})
+	set.Parse([]string{"--myflag", "bat", "baz"})
 	expect(t, c.Args().Len(), 2)
 	expect(t, c.Bool("myflag"), true)
 }
@@ -150,7 +150,7 @@ func TestContext_NArg(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	set.Bool("myflag", false, "doc")
 	c := NewContext(nil, set, nil)
-	_ = set.Parse([]string{"--myflag", "bat", "baz"})
+	set.Parse([]string{"--myflag", "bat", "baz"})
 	expect(t, c.NArg(), 2)
 }
 
@@ -164,8 +164,8 @@ func TestContext_IsSet(t *testing.T) {
 	parentCtx := NewContext(nil, parentSet, nil)
 	ctx := NewContext(nil, set, parentCtx)
 
-	_ = set.Parse([]string{"--one-flag", "--two-flag", "--three-flag", "frob"})
-	_ = parentSet.Parse([]string{"--top-flag"})
+	set.Parse([]string{"--one-flag", "--two-flag", "--three-flag", "frob"})
+	parentSet.Parse([]string{"--top-flag"})
 
 	expect(t, ctx.IsSet("one-flag"), true)
 	expect(t, ctx.IsSet("two-flag"), true)
@@ -186,8 +186,8 @@ func TestContext_IsSet_fromEnv(t *testing.T) {
 
 	defer resetEnv(os.Environ())
 	os.Clearenv()
-	_ = os.Setenv("APP_TIMEOUT_SECONDS", "15.5")
-	_ = os.Setenv("APP_PASSWORD", "")
+	os.Setenv("APP_TIMEOUT_SECONDS", "15.5")
+	os.Setenv("APP_PASSWORD", "")
 	a := App{
 		Flags: []Flag{
 			&Float64Flag{Name: "timeout", Aliases: []string{"t"}, EnvVars: []string{"APP_TIMEOUT_SECONDS"}},
@@ -207,7 +207,7 @@ func TestContext_IsSet_fromEnv(t *testing.T) {
 			return nil
 		},
 	}
-	_ = a.Run([]string{"run"})
+	a.Run([]string{"run"})
 	expect(t, timeoutIsSet, true)
 	expect(t, tIsSet, true)
 	expect(t, passwordIsSet, true)
@@ -215,8 +215,8 @@ func TestContext_IsSet_fromEnv(t *testing.T) {
 	expect(t, noEnvVarIsSet, false)
 	expect(t, nIsSet, false)
 
-	_ = os.Setenv("APP_UNPARSABLE", "foobar")
-	_ = a.Run([]string{"run"})
+	os.Setenv("APP_UNPARSABLE", "foobar")
+	a.Run([]string{"run"})
 	expect(t, unparsableIsSet, false)
 	expect(t, uIsSet, false)
 }
@@ -229,8 +229,8 @@ func TestContext_NumFlags(t *testing.T) {
 	globalSet.Bool("myflagGlobal", true, "doc")
 	globalCtx := NewContext(nil, globalSet, nil)
 	c := NewContext(nil, set, globalCtx)
-	_ = set.Parse([]string{"--myflag", "--otherflag=foo"})
-	_ = globalSet.Parse([]string{"--myflagGlobal"})
+	set.Parse([]string{"--myflag", "--otherflag=foo"})
+	globalSet.Parse([]string{"--myflagGlobal"})
 	expect(t, c.NumFlags(), 2)
 }
 
@@ -240,7 +240,7 @@ func TestContext_Set(t *testing.T) {
 	c := NewContext(nil, set, nil)
 
 	expect(t, c.IsSet("int"), false)
-	_ = c.Set("int", "1")
+	c.Set("int", "1")
 	expect(t, c.Int("int"), 1)
 	expect(t, c.IsSet("int"), true)
 }
@@ -253,8 +253,8 @@ func TestContext_LocalFlagNames(t *testing.T) {
 	parentSet.Bool("top-flag", true, "doc")
 	parentCtx := NewContext(nil, parentSet, nil)
 	ctx := NewContext(nil, set, parentCtx)
-	_ = set.Parse([]string{"--one-flag", "--two-flag=foo"})
-	_ = parentSet.Parse([]string{"--top-flag"})
+	set.Parse([]string{"--one-flag", "--two-flag=foo"})
+	parentSet.Parse([]string{"--top-flag"})
 
 	actualFlags := ctx.LocalFlagNames()
 	sort.Strings(actualFlags)
@@ -270,8 +270,8 @@ func TestContext_FlagNames(t *testing.T) {
 	parentSet.Bool("top-flag", true, "doc")
 	parentCtx := NewContext(nil, parentSet, nil)
 	ctx := NewContext(nil, set, parentCtx)
-	_ = set.Parse([]string{"--one-flag", "--two-flag=foo"})
-	_ = parentSet.Parse([]string{"--top-flag"})
+	set.Parse([]string{"--one-flag", "--two-flag=foo"})
+	parentSet.Parse([]string{"--top-flag"})
 
 	actualFlags := ctx.FlagNames()
 	sort.Strings(actualFlags)
@@ -286,8 +286,8 @@ func TestContext_Lineage(t *testing.T) {
 	parentSet.Bool("top-flag", true, "doc")
 	parentCtx := NewContext(nil, parentSet, nil)
 	ctx := NewContext(nil, set, parentCtx)
-	_ = set.Parse([]string{"--local-flag"})
-	_ = parentSet.Parse([]string{"--top-flag"})
+	set.Parse([]string{"--local-flag"})
+	parentSet.Parse([]string{"--top-flag"})
 
 	lineage := ctx.Lineage()
 	expect(t, len(lineage), 2)
@@ -302,8 +302,8 @@ func TestContext_lookupFlagSet(t *testing.T) {
 	parentSet.Bool("top-flag", true, "doc")
 	parentCtx := NewContext(nil, parentSet, nil)
 	ctx := NewContext(nil, set, parentCtx)
-	_ = set.Parse([]string{"--local-flag"})
-	_ = parentSet.Parse([]string{"--top-flag"})
+	set.Parse([]string{"--local-flag"})
+	parentSet.Parse([]string{"--top-flag"})
 
 	fs := lookupFlagSet("top-flag", ctx)
 	expect(t, fs, parentCtx.flagSet)
@@ -551,14 +551,14 @@ func TestCheckRequiredFlags(t *testing.T) {
 			if test.envVarInput[0] != "" {
 				defer resetEnv(os.Environ())
 				os.Clearenv()
-				_ = os.Setenv(test.envVarInput[0], test.envVarInput[1])
+				os.Setenv(test.envVarInput[0], test.envVarInput[1])
 			}
 
 			set := flag.NewFlagSet("test", 0)
 			for _, flags := range test.flags {
-				_ = flags.Apply(set)
+				flags.Apply(set)
 			}
-			_ = set.Parse(test.parseInput)
+			set.Parse(test.parseInput)
 
 			c := &Context{}
 			ctx := NewContext(c.App, set, c)

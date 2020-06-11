@@ -18,7 +18,7 @@ func Test_ShowAppHelp_NoAuthor(t *testing.T) {
 
 	c := NewContext(app, nil, nil)
 
-	_ = ShowAppHelp(c)
+	ShowAppHelp(c)
 
 	if bytes.Contains(output.Bytes(), []byte("AUTHOR(S):")) {
 		t.Errorf("expected\n%snot to include %s", output.String(), "AUTHOR(S):")
@@ -33,7 +33,7 @@ func Test_ShowAppHelp_NoVersion(t *testing.T) {
 
 	c := NewContext(app, nil, nil)
 
-	_ = ShowAppHelp(c)
+	ShowAppHelp(c)
 
 	if bytes.Contains(output.Bytes(), []byte("VERSION:")) {
 		t.Errorf("expected\n%snot to include %s", output.String(), "VERSION:")
@@ -48,7 +48,7 @@ func Test_ShowAppHelp_HideVersion(t *testing.T) {
 
 	c := NewContext(app, nil, nil)
 
-	_ = ShowAppHelp(c)
+	ShowAppHelp(c)
 
 	if bytes.Contains(output.Bytes(), []byte("VERSION:")) {
 		t.Errorf("expected\n%snot to include %s", output.String(), "VERSION:")
@@ -80,7 +80,7 @@ func Test_Help_Custom_Flags(t *testing.T) {
 	}
 	output := new(bytes.Buffer)
 	app.Writer = output
-	_ = app.Run([]string{"test", "-h"})
+	app.Run([]string{"test", "-h"})
 	if output.Len() > 0 {
 		t.Errorf("unexpected output: %s", output.String())
 	}
@@ -111,7 +111,7 @@ func Test_Version_Custom_Flags(t *testing.T) {
 	}
 	output := new(bytes.Buffer)
 	app.Writer = output
-	_ = app.Run([]string{"test", "-v"})
+	app.Run([]string{"test", "-v"})
 	if output.Len() > 0 {
 		t.Errorf("unexpected output: %s", output.String())
 	}
@@ -121,7 +121,7 @@ func Test_helpCommand_Action_ErrorIfNoTopic(t *testing.T) {
 	app := &App{}
 
 	set := flag.NewFlagSet("test", 0)
-	_ = set.Parse([]string{"foo"})
+	set.Parse([]string{"foo"})
 
 	c := NewContext(app, set, nil)
 
@@ -149,7 +149,7 @@ func Test_helpCommand_InHelpOutput(t *testing.T) {
 	app := &App{}
 	output := &bytes.Buffer{}
 	app.Writer = output
-	_ = app.Run([]string{"test", "--help"})
+	app.Run([]string{"test", "--help"})
 
 	s := output.String()
 
@@ -166,7 +166,7 @@ func Test_helpSubcommand_Action_ErrorIfNoTopic(t *testing.T) {
 	app := &App{}
 
 	set := flag.NewFlagSet("test", 0)
-	_ = set.Parse([]string{"foo"})
+	set.Parse([]string{"foo"})
 
 	c := NewContext(app, set, nil)
 
@@ -205,7 +205,7 @@ func TestShowAppHelp_CommandAliases(t *testing.T) {
 
 	output := &bytes.Buffer{}
 	app.Writer = output
-	_ = app.Run([]string{"foo", "--help"})
+	app.Run([]string{"foo", "--help"})
 
 	if !strings.Contains(output.String(), "frobbly, fr, frob") {
 		t.Errorf("expected output to include all command aliases; got: %q", output.String())
@@ -401,7 +401,7 @@ func TestShowCommandHelp_CommandAliases(t *testing.T) {
 
 	output := &bytes.Buffer{}
 	app.Writer = output
-	_ = app.Run([]string{"foo", "help", "fr"})
+	app.Run([]string{"foo", "help", "fr"})
 
 	if !strings.Contains(output.String(), "frobbly") {
 		t.Errorf("expected output to include command name; got: %q", output.String())
@@ -427,7 +427,7 @@ func TestShowSubcommandHelp_CommandAliases(t *testing.T) {
 
 	output := &bytes.Buffer{}
 	app.Writer = output
-	_ = app.Run([]string{"foo", "help"})
+	app.Run([]string{"foo", "help"})
 
 	if !strings.Contains(output.String(), "frobbly, fr, frob, bork") {
 		t.Errorf("expected output to include all command aliases; got: %q", output.String())
@@ -461,7 +461,7 @@ EXAMPLES:
 	}
 	output := &bytes.Buffer{}
 	app.Writer = output
-	_ = app.Run([]string{"foo", "help", "frobbly"})
+	app.Run([]string{"foo", "help", "frobbly"})
 
 	if strings.Contains(output.String(), "2. Frobbly runs without this param locally.") {
 		t.Errorf("expected output to exclude \"2. Frobbly runs without this param locally.\"; got: %q", output.String())
@@ -489,7 +489,7 @@ func TestShowSubcommandHelp_CommandUsageText(t *testing.T) {
 	output := &bytes.Buffer{}
 	app.Writer = output
 
-	_ = app.Run([]string{"foo", "frobbly", "--help"})
+	app.Run([]string{"foo", "frobbly", "--help"})
 
 	if !strings.Contains(output.String(), "this is usage text") {
 		t.Errorf("expected output to include usage text; got: %q", output.String())
@@ -513,7 +513,7 @@ func TestShowSubcommandHelp_SubcommandUsageText(t *testing.T) {
 
 	output := &bytes.Buffer{}
 	app.Writer = output
-	_ = app.Run([]string{"foo", "frobbly", "bobbly", "--help"})
+	app.Run([]string{"foo", "frobbly", "bobbly", "--help"})
 
 	if !strings.Contains(output.String(), "this is usage text") {
 		t.Errorf("expected output to include usage text; got: %q", output.String())
@@ -541,7 +541,7 @@ func TestShowAppHelp_HiddenCommand(t *testing.T) {
 
 	output := &bytes.Buffer{}
 	app.Writer = output
-	_ = app.Run([]string{"app", "--help"})
+	app.Run([]string{"app", "--help"})
 
 	if strings.Contains(output.String(), "secretfrob") {
 		t.Errorf("expected output to exclude \"secretfrob\"; got: %q", output.String())
@@ -737,7 +737,7 @@ VERSION:
 
 	output := &bytes.Buffer{}
 	app.Writer = output
-	_ = app.Run([]string{"app", "--help"})
+	app.Run([]string{"app", "--help"})
 
 	if strings.Contains(output.String(), "secretfrob") {
 		t.Errorf("expected output to exclude \"secretfrob\"; got: %q", output.String())
@@ -828,7 +828,7 @@ func TestHideHelpCommand_WithHideHelp(t *testing.T) {
 
 func newContextFromStringSlice(ss []string) *Context {
 	set := flag.NewFlagSet("", flag.ContinueOnError)
-	_ = set.Parse(ss)
+	set.Parse(ss)
 	return &Context{flagSet: set}
 }
 

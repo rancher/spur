@@ -513,13 +513,13 @@ func TestParseError(t *testing.T) {
 	for _, typ := range []string{"bool", "int", "int64", "uint", "uint64", "float64", "duration"} {
 		fs := NewFlagSet("parse error test", ContinueOnError)
 		fs.SetOutput(ioutil.Discard)
-		_ = fs.Bool("bool", false, "")
-		_ = fs.Int("int", 0, "")
-		_ = fs.Int64("int64", 0, "")
-		_ = fs.Uint("uint", 0, "")
-		_ = fs.Uint64("uint64", 0, "")
-		_ = fs.Float64("float64", 0, "")
-		_ = fs.Duration("duration", 0, "")
+		fs.Bool("bool", false, "")
+		fs.Int("int", 0, "")
+		fs.Int64("int64", 0, "")
+		fs.Uint("uint", 0, "")
+		fs.Uint64("uint64", 0, "")
+		fs.Float64("float64", 0, "")
+		fs.Duration("duration", 0, "")
 		// Strings cannot give errors.
 		args := []string{"-" + typ + "=x"}
 		err := fs.Parse(args) // x is not a valid setting for any flag.
@@ -544,11 +544,11 @@ func TestRangeError(t *testing.T) {
 	for _, arg := range bad {
 		fs := NewFlagSet("parse error test", ContinueOnError)
 		fs.SetOutput(ioutil.Discard)
-		_ = fs.Int("int", 0, "")
-		_ = fs.Int64("int64", 0, "")
-		_ = fs.Uint("uint", 0, "")
-		_ = fs.Uint64("uint64", 0, "")
-		_ = fs.Float64("float64", 0, "")
+		fs.Int("int", 0, "")
+		fs.Int64("int64", 0, "")
+		fs.Uint("uint", 0, "")
+		fs.Uint64("uint64", 0, "")
+		fs.Float64("float64", 0, "")
 		// Strings cannot give errors, and bools and durations do not return strconv.NumError.
 		err := fs.Parse([]string{arg})
 		if err == nil {
