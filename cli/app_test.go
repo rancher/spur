@@ -2168,3 +2168,82 @@ func TestSetupInitializesOnlyNilWriters(t *testing.T) {
 		t.Errorf("expected a.Writer to be os.Stdout")
 	}
 }
+
+func testApp() *App {
+	app := newTestApp()
+	app.Name = "greet"
+	app.Flags = []Flag{
+		&StringFlag{
+			Name:      "socket",
+			Aliases:   []string{"s"},
+			Usage:     "some 'usage' text",
+			Value:     "value",
+			TakesFile: true,
+		},
+		&StringFlag{Name: "flag", Aliases: []string{"fl", "f"}},
+		&BoolFlag{
+			Name:    "another-flag",
+			Aliases: []string{"b"},
+			Usage:   "another usage text",
+		},
+		&BoolFlag{
+			Name:   "hidden-flag",
+			Hidden: true,
+		},
+	}
+	app.Commands = []*Command{{
+		Aliases: []string{"c"},
+		Flags: []Flag{
+			&StringFlag{
+				Name:      "flag",
+				Aliases:   []string{"fl", "f"},
+				TakesFile: true,
+			},
+			&BoolFlag{
+				Name:    "another-flag",
+				Aliases: []string{"b"},
+				Usage:   "another usage text",
+			},
+		},
+		Name:  "config",
+		Usage: "another usage test",
+		Subcommands: []*Command{{
+			Aliases: []string{"s", "ss"},
+			Flags: []Flag{
+				&StringFlag{Name: "sub-flag", Aliases: []string{"sub-fl", "s"}},
+				&BoolFlag{
+					Name:    "sub-command-flag",
+					Aliases: []string{"s"},
+					Usage:   "some usage text",
+				},
+			},
+			Name:  "sub-config",
+			Usage: "another usage test",
+		}},
+	}, {
+		Aliases: []string{"i", "in"},
+		Name:    "info",
+		Usage:   "retrieve generic information",
+	}, {
+		Name: "some-command",
+	}, {
+		Name:   "hidden-command",
+		Hidden: true,
+	}}
+	app.UsageText = "app [first_arg] [second_arg]"
+	app.Usage = "Some app"
+	app.Authors = []*Author{
+		{Name: "Harrison", Email: "harrison@lolwut.com"},
+		{Name: "Oliver Allen", Email: "oliver@toyshop.com"},
+	}
+	return app
+}
+
+func expectFileContent(t *testing.T, file, expected string) {
+	data, err := ioutil.ReadFile(file)
+	// Ignore windows line endings
+	// TODO: Replace with bytes.ReplaceAll when support for Go 1.11 is dropped
+	data = bytes.Replace(data, []byte("\r\n"), []byte("\n"), -1)
+	expect(t, err, nil)
+	expect(t, string(data), expected)
+}

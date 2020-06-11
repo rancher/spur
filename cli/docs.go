@@ -1,3 +1,5 @@
+// +build docgen
+
 package cli
 
 import (
