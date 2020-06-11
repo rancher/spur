@@ -16,14 +16,15 @@ import (
 	"github.com/rancher/spur/cli"
 )
 
-var packages = []string{"cli", "altsrc"}
+var pkg = "spur"
 
 func main() {
 	app := cli.NewApp()
 
 	app.Name = "builder"
-	app.Usage = "Generates a new urfave/cli build!"
+	app.Usage = "Generates a new build!"
 
+	tags := &cli.StringFlag{Name: "tags"}
 	app.Commands = cli.Commands{
 		{
 			Name:   "vet",
@@ -32,6 +33,7 @@ func main() {
 		{
 			Name:   "test",
 			Action: TestActionFunc,
+			Flags:  []cli.Flag{tags},
 		},
 		{
 			Name:   "gfmrun",
@@ -44,11 +46,7 @@ func main() {
 		{
 			Name:   "check-binary-size",
 			Action: checkBinarySizeActionFunc,
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name: "tags",
-				},
-			},
+			Flags:  []cli.Flag{tags},
 		},
 	}
 
@@ -73,21 +71,12 @@ func VetActionFunc(_ *cli.Context) error {
 }
 
 func TestActionFunc(c *cli.Context) error {
-	for _, pkg := range packages {
-		var packageName string
 
-		if pkg == "cli" {
-			packageName = "github.com/rancher/spur/cli"
-		} else {
-			packageName = fmt.Sprintf("github.com/rancher/spur/cli/%s", pkg)
-		}
+	coverProfile := fmt.Sprintf("--coverprofile=%s.coverprofile", pkg)
 
-		coverProfile := fmt.Sprintf("--coverprofile=%s.coverprofile", pkg)
-
-		err := runCmd("go", "test", "-v", coverProfile, packageName)
-		if err != nil {
-			return err
-		}
+	err := runCmd("go", "test", "-tags", c.String("tags"), "-v", coverProfile, "./...")
+	if err != nil {
+		return err
 	}
 
 	return testCleanup()
@@ -96,27 +85,25 @@ func TestActionFunc(c *cli.Context) error {
 func testCleanup() error {
 	var out bytes.Buffer
 
-	for _, pkg := range packages {
-		file, err := os.Open(fmt.Sprintf("%s.coverprofile", pkg))
-		if err != nil {
-			return err
-		}
+	file, err := os.Open(fmt.Sprintf("%s.coverprofile", pkg))
+	if err != nil {
+		return err
+	}
 
-		b, err := ioutil.ReadAll(file)
-		if err != nil {
-			return err
-		}
+	b, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
 
-		out.Write(b)
-		err = file.Close()
-		if err != nil {
-			return err
-		}
+	out.Write(b)
+	err = file.Close()
+	if err != nil {
+		return err
+	}
 
-		err = os.Remove(fmt.Sprintf("%s.coverprofile", pkg))
-		if err != nil {
-			return err
-		}
+	err = os.Remove(fmt.Sprintf("%s.coverprofile", pkg))
+	if err != nil {
+		return err
 	}
 
 	outFile, err := os.Create("coverage.txt")
@@ -194,10 +181,10 @@ func TocActionFunc(c *cli.Context) error {
 // of https://github.com/urfave/cli/issues/1057
 func checkBinarySizeActionFunc(c *cli.Context) (err error) {
 	const (
-		cliSourceFilePath    = "./internal/example-cli/example-cli.go"
-		cliBuiltFilePath     = "./internal/example-cli/built-example"
-		helloSourceFilePath  = "./internal/example-hello-world/example-hello-world.go"
-		helloBuiltFilePath   = "./internal/example-hello-world/built-example"
+		cliSourceFilePath    = "./cli/internal/example-cli/example-cli.go"
+		cliBuiltFilePath     = "./cli/internal/example-cli/built-example"
+		helloSourceFilePath  = "./cli/internal/example-hello-world/example-hello-world.go"
+		helloBuiltFilePath   = "./cli/internal/example-hello-world/built-example"
 		desiredMinBinarySize = 1.5
 		desiredMaxBinarySize = 2.5
 		badNewsEmoji         = "🚨"
