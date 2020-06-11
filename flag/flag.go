@@ -74,43 +74,14 @@ import (
 	"os"
 	"reflect"
 	"sort"
-	"strconv"
 	"strings"
+
+	"github.com/rancher/spur/generic"
 )
 
 // ErrHelp is the error returned if the -help or -h flag is invoked
 // but no such flag is defined.
 var ErrHelp = errors.New("flag: help requested")
-
-// errParse is returned by Set if a flag's value fails to parse, such as with an invalid integer for Int.
-// It then gets wrapped through failf to provide more information.
-var errParse = errors.New("parse error")
-
-// errRange is returned by Set if a flag's value is out of range.
-// It then gets wrapped through failf to provide more information.
-var errRange = errors.New("value out of range")
-
-func numError(err error) error {
-	ne, ok := err.(*strconv.NumError)
-	if !ok {
-		return err
-	}
-	if ne.Err == strconv.ErrSyntax {
-		return errParse
-	}
-	if ne.Err == strconv.ErrRange {
-		return errRange
-	}
-	return err
-}
-
-type boolFlag interface {
-	IsBoolFlag() bool
-}
-
-type typeInfo interface {
-	Type() string
-}
 
 // Value is the interface to the dynamic value stored in a flag.
 // (The default value is represented as a string.)
@@ -134,6 +105,25 @@ type Value interface {
 type Getter interface {
 	Value
 	Get() interface{}
+}
+
+// BoolFlag is an interface for determining if the value of a flag is needed.
+type BoolFlag interface {
+	IsBoolFlag() bool
+}
+
+// IsBoolValue returns true for data types which don't require a flag value
+func IsBoolValue(value interface{}) bool {
+	if v, ok := value.(BoolFlag); ok {
+		return v.IsBoolFlag()
+	}
+	var t reflect.Type
+	if v, ok := value.(Getter); ok {
+		t = generic.ElemTypeOf(v.Get())
+	} else {
+		t = generic.ElemTypeOf(value)
+	}
+	return t != nil && t.String() == "bool"
 }
 
 // ErrorHandling defines how FlagSet.Parse behaves if the parse fails.
@@ -189,6 +179,8 @@ func sortFlags(flags map[string]*Flag) []*Flag {
 	})
 	return result
 }
+
+const invalidValueTemplate = "invalid value %q for flag -%s: %v"
 
 // Output returns the destination for usage and error messages. os.Stderr is returned if
 // output was not set or was set to nil.
@@ -262,7 +254,7 @@ func (f *FlagSet) Set(name string, value interface{}) error {
 	}
 	err := flag.Value.Set(value)
 	if err != nil {
-		return err
+		return fmt.Errorf(invalidValueTemplate, value, name, err)
 	}
 	if f.actual == nil {
 		f.actual = make(map[string]*Flag)
@@ -281,15 +273,12 @@ func Set(name string, value interface{}) error {
 func isZeroValue(flag *Flag, value string) bool {
 	// Build a zero value of the flag's Value type, and see if the
 	// result of calling its String method equals the value passed in.
-	// This works unless the Value type is itself an interface type.
-	typ := reflect.TypeOf(flag.Value)
-	var z reflect.Value
-	if typ.Kind() == reflect.Ptr {
-		z = reflect.New(typ.Elem())
-	} else {
-		z = reflect.Zero(typ)
+	if val, ok := flag.Value.(Getter); ok {
+		if s, ok := generic.ToString(generic.Zero(val.Get())); ok {
+			return value == s
+		}
 	}
-	return value == z.Interface().(Value).String()
+	return false
 }
 
 // UnquoteUsage extracts a back-quoted name from the usage
@@ -314,10 +303,10 @@ func UnquoteUsage(flag *Flag) (name string, usage string) {
 	}
 	// No explicit name, so use type if we can find one.
 	name = "value"
-	if v, ok := flag.Value.(typeInfo); ok {
-		name = v.Type()
+	if v, ok := flag.Value.(Getter); ok {
+		name = generic.TypeOf(v.Get()).String()
 	}
-	if v, ok := flag.Value.(boolFlag); ok && v.IsBoolFlag() {
+	if IsBoolValue(flag.Value) {
 		name = ""
 	}
 	return
@@ -345,7 +334,7 @@ func (f *FlagSet) PrintDefaults() {
 		s += strings.ReplaceAll(usage, "\n", "\n    \t")
 
 		if !isZeroValue(flag, flag.DefValue) {
-			if _, ok := flag.Value.(*stringValue); ok {
+			if v, ok := flag.Value.(Getter); ok && generic.TypeOf(v.Get()).String() == "string" {
 				// put quotes on the value
 				s += fmt.Sprintf(" (default %q)", flag.DefValue)
 			} else {
@@ -543,10 +532,10 @@ func (f *FlagSet) parseOne() (bool, error) {
 		return false, f.failf("flag provided but not defined: -%s", name)
 	}
 
-	if fv, ok := flag.Value.(boolFlag); ok && fv.IsBoolFlag() { // special case: doesn't need an arg
+	if IsBoolValue(flag.Value) { // special case: doesn't need an arg
 		if hasValue {
 			if err := flag.Value.Set(value); err != nil {
-				return false, f.failf("invalid boolean value %q for -%s: %v", value, name, err)
+				return false, f.failf(invalidValueTemplate, value, name, err)
 			}
 		} else {
 			if err := flag.Value.Set("true"); err != nil {
@@ -564,7 +553,7 @@ func (f *FlagSet) parseOne() (bool, error) {
 			return false, f.failf("flag needs an argument: -%s", name)
 		}
 		if err := flag.Value.Set(value); err != nil {
-			return false, f.failf("invalid value %q for flag -%s: %v", value, name, err)
+			return false, f.failf(invalidValueTemplate, value, name, err)
 		}
 	}
 	if f.actual == nil {

@@ -19,6 +19,7 @@ import (
 	"time"
 
 	. "github.com/rancher/spur/flag"
+	"github.com/rancher/spur/generic"
 )
 
 func boolString(s string) string {
@@ -38,6 +39,8 @@ func TestEverything(t *testing.T) {
 	String("test_string", "0", "string value")
 	Float64("test_float64", 0, "float64 value")
 	Duration("test_duration", 0, "time.Duration value")
+	Time("test_time", time.Unix(0, 0), "time.Time value")
+	IntSlice("test_int_slice", []int{0, 0}, "[]int value")
 
 	m := make(map[string]*Flag)
 	desired := "0"
@@ -52,6 +55,13 @@ func TestEverything(t *testing.T) {
 				ok = true
 			case f.Name == "test_duration" && f.Value.String() == desired+"s":
 				ok = true
+			case f.Name == "test_time":
+				var i int64
+				generic.FromString(desired, &i)
+				t, _ := generic.ToString(time.Unix(i, 0))
+				ok = f.Value.String() == t
+			case f.Name == "test_int_slice":
+				ok = f.Value.String() == fmt.Sprintf("[%s,%s]", desired, desired)
 			}
 			if !ok {
 				t.Error("Visit: bad value", f.Value.String(), "for", f.Name)
@@ -59,7 +69,7 @@ func TestEverything(t *testing.T) {
 		}
 	}
 	VisitAll(visitor)
-	if len(m) != 8 {
+	if len(m) != 10 {
 		t.Error("VisitAll misses some flags")
 		for k, v := range m {
 			t.Log(k, *v)
@@ -82,9 +92,12 @@ func TestEverything(t *testing.T) {
 	Set("test_string", "1")
 	Set("test_float64", "1")
 	Set("test_duration", "1s")
+	Set("test_time", "1")
+	Set("test_int_slice", "1")
+	Set("test_int_slice", "1")
 	desired = "1"
 	Visit(visitor)
-	if len(m) != 8 {
+	if len(m) != 10 {
 		t.Error("Visit fails after set")
 		for k, v := range m {
 			t.Log(k, *v)
