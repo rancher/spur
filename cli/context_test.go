@@ -2,12 +2,13 @@ package cli
 
 import (
 	"context"
-	"flag"
 	"os"
 	"sort"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/rancher/spur/flag"
 )
 
 func TestNewContext(t *testing.T) {
@@ -114,15 +115,15 @@ func TestContext_String(t *testing.T) {
 	expect(t, c.String("top-flag"), "hai veld")
 }
 
-func TestContext_Path(t *testing.T) {
+func TestContext_StringSlice(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
-	set.String("path", "path/to/file", "path to file")
+	set.StringSlice("myflag", []string{"hello", "world"}, "doc")
 	parentSet := flag.NewFlagSet("test", 0)
-	parentSet.String("top-path", "path/to/top/file", "doc")
+	parentSet.StringSlice("top-flag", []string{"hai", "veld"}, "doc")
 	parentCtx := NewContext(nil, parentSet, nil)
 	c := NewContext(nil, set, parentCtx)
-	expect(t, c.Path("path"), "path/to/file")
-	expect(t, c.Path("top-path"), "path/to/top/file")
+	expect(t, c.StringSlice("myflag"), []string{"hello", "world"})
+	expect(t, c.StringSlice("top-flag"), []string{"hai", "veld"})
 }
 
 func TestContext_Bool(t *testing.T) {

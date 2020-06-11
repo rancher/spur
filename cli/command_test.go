@@ -3,7 +3,7 @@ package cli
 import (
 	"bytes"
 	"errors"
-	"flag"
+	"github.com/rancher/spur/flag"
 	"fmt"
 	"io/ioutil"
 	"strings"

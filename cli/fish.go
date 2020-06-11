@@ -6,6 +6,8 @@ import (
 	"io"
 	"strings"
 	"text/template"
+
+	"github.com/rancher/spur/flag"
 )
 
 // ToFishCompletion creates a fish completion string for the `*App`
@@ -115,11 +117,6 @@ func (a *App) prepareFishCommands(commands []*Command, allCommands *[]string, pr
 func (a *App) prepareFishFlags(flags []Flag, previousCommands []string) []string {
 	completions := []string{}
 	for _, f := range flags {
-		flag, ok := f.(DocGenerationFlag)
-		if !ok {
-			continue
-		}
-
 		completion := &strings.Builder{}
 		completion.WriteString(fmt.Sprintf(
 			"complete -c %s -n '%s'",
@@ -129,7 +126,7 @@ func (a *App) prepareFishFlags(flags []Flag, previousCommands []string) []string
 
 		fishAddFileFlag(f, completion)
 
-		for idx, opt := range flag.Names() {
+		for idx, opt := range FlagNames(f) {
 			if idx == 0 {
 				completion.WriteString(fmt.Sprintf(
 					" -l %s", strings.TrimSpace(opt),
@@ -142,13 +139,13 @@ func (a *App) prepareFishFlags(flags []Flag, previousCommands []string) []string
 			}
 		}
 
-		if flag.TakesValue() {
+		if v, ok := getFlagValue(f); ok && !flag.IsBoolValue(v) {
 			completion.WriteString(" -r")
 		}
 
-		if flag.GetUsage() != "" {
+		if usage, ok := getFlagUsage(f); ok && usage != "" {
 			completion.WriteString(fmt.Sprintf(" -d '%s'",
-				escapeSingleQuotes(flag.GetUsage())))
+				escapeSingleQuotes(usage)))
 		}
 
 		completions = append(completions, completion.String())
@@ -158,19 +155,8 @@ func (a *App) prepareFishFlags(flags []Flag, previousCommands []string) []string
 }
 
 func fishAddFileFlag(flag Flag, completion *strings.Builder) {
-	switch f := flag.(type) {
-	case *GenericFlag:
-		if f.TakesFile {
-			return
-		}
-	case *StringFlag:
-		if f.TakesFile {
-			return
-		}
-	case *StringSliceFlag:
-		if f.TakesFile {
-			return
-		}
+	if takesFile, ok := getFlagTakesFile(flag); ok && takesFile {
+		return
 	}
 	completion.WriteString(" -f")
 }

@@ -2,22 +2,14 @@ package cli
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"sort"
 	"time"
-)
 
-var (
-	changeLogURL            = "https://github.com/urfave/cli/blob/master/docs/CHANGELOG.md"
-	appActionDeprecationURL = fmt.Sprintf("%s#deprecated-cli-app-action-signature", changeLogURL)
-	contactSysadmin         = "This is an error in the application.  Please contact the distributor of this application if this is not you."
-	errInvalidActionType    = NewExitError("ERROR invalid Action type. "+
-		fmt.Sprintf("Must be `func(*Context`)` or `func(*Context) error).  %s", contactSysadmin)+
-		fmt.Sprintf("See %s", appActionDeprecationURL), 2)
+	"github.com/rancher/spur/flag"
 )
 
 // App is the main structure of a cli application. It is recommended that
@@ -94,6 +86,22 @@ type App struct {
 	UseShortOptionHandling bool
 
 	didSetup bool
+}
+
+type showHelpFunc = func(context *Context) error
+
+type showHelpError struct {
+	error
+}
+
+// ShowHelpOnError will take a BeforeFunc and show command usage on error
+func ShowHelpOnError(someFunc BeforeFunc) BeforeFunc {
+	return func(context *Context) error {
+		if err := someFunc(context); err != nil {
+			return showHelpError{err}
+		}
+		return nil
+	}
 }
 
 // Tries to find out when this binary was compiled.
@@ -240,8 +248,8 @@ func (a *App) RunContext(ctx context.Context, arguments []string) (err error) {
 	nerr := normalizeFlags(a.Flags, set)
 	context := NewContext(a, set, &Context{Context: ctx})
 	if nerr != nil {
-		_, _ = fmt.Fprintln(a.Writer, nerr)
-		_ = ShowAppHelp(context)
+		fmt.Fprintln(a.Writer, nerr)
+		ShowAppHelp(context)
 		return nerr
 	}
 	context.shellComplete = shellComplete
@@ -251,18 +259,11 @@ func (a *App) RunContext(ctx context.Context, arguments []string) (err error) {
 	}
 
 	if err != nil {
-		if a.OnUsageError != nil {
-			err := a.OnUsageError(context, err, false)
-			a.handleExitCoder(context, err)
-			return err
-		}
-		_, _ = fmt.Fprintf(a.Writer, "%s %s\n\n", "Incorrect Usage.", err.Error())
-		_ = ShowAppHelp(context)
-		return err
+		return a.helpOnError(ShowAppHelp, context, showHelpError{err})
 	}
 
 	if !a.HideHelp && checkHelp(context) {
-		_ = ShowAppHelp(context)
+		ShowAppHelp(context)
 		return nil
 	}
 
@@ -273,13 +274,14 @@ func (a *App) RunContext(ctx context.Context, arguments []string) (err error) {
 
 	cerr := checkRequiredFlags(a.Flags, context)
 	if cerr != nil {
-		_ = ShowAppHelp(context)
+		ShowAppHelp(context)
 		return cerr
 	}
 
 	if a.After != nil {
 		defer func() {
 			if afterErr := a.After(context); afterErr != nil {
+				a.handleExitCoder(context, err)
 				if err != nil {
 					err = newMultiError(err, afterErr)
 				} else {
@@ -290,11 +292,8 @@ func (a *App) RunContext(ctx context.Context, arguments []string) (err error) {
 	}
 
 	if a.Before != nil {
-		beforeErr := a.Before(context)
-		if beforeErr != nil {
-			a.handleExitCoder(context, beforeErr)
-			err = beforeErr
-			return err
+		if err := a.Before(context); err != nil {
+			return a.helpOnError(ShowAppHelp, context, err)
 		}
 	}
 
@@ -318,14 +317,31 @@ func (a *App) RunContext(ctx context.Context, arguments []string) (err error) {
 	return err
 }
 
+func (a *App) helpOnError(showHelp showHelpFunc, context *Context, err error) error {
+	if err == nil {
+		return nil
+	}
+	if e, ok := err.(showHelpError); ok {
+		err = e.error
+		if a.OnUsageError != nil {
+			err = a.OnUsageError(context, err, false)
+		} else {
+			fmt.Fprintf(a.Writer, "%s:\n   %s\n\n", "Incorrect Usage", err.Error())
+			showHelp(context)
+		}
+	}
+	a.handleExitCoder(context, err)
+	return err
+}
+
 // RunAndExitOnError calls .Run() and exits non-zero if an error was returned
 //
 // Deprecated: instead you should return an error that fulfills cli.ExitCoder
-// to cli.App.Run. This will cause the application to exit with the given eror
+// to cli.App.Run. This will cause the application to exit with the given error
 // code in the cli.ExitCoder
 func (a *App) RunAndExitOnError() {
 	if err := a.Run(os.Args); err != nil {
-		_, _ = fmt.Fprintln(a.ErrWriter, err)
+		fmt.Fprintf(a.ErrWriter, "\nFatal: %s\n", err)
 		OsExiter(1)
 	}
 }
@@ -355,12 +371,12 @@ func (a *App) RunAsSubcommand(ctx *Context) (err error) {
 	context := NewContext(a, set, ctx)
 
 	if nerr != nil {
-		_, _ = fmt.Fprintln(a.Writer, nerr)
-		_, _ = fmt.Fprintln(a.Writer)
+		fmt.Fprintln(a.Writer, nerr)
+		fmt.Fprintln(a.Writer)
 		if len(a.Commands) > 0 {
-			_ = ShowSubcommandHelp(context)
+			ShowSubcommandHelp(context)
 		} else {
-			_ = ShowCommandHelp(ctx, context.Args().First())
+			ShowCommandHelp(ctx, context.Args().First())
 		}
 		return nerr
 	}
@@ -370,14 +386,7 @@ func (a *App) RunAsSubcommand(ctx *Context) (err error) {
 	}
 
 	if err != nil {
-		if a.OnUsageError != nil {
-			err = a.OnUsageError(context, err, true)
-			a.handleExitCoder(context, err)
-			return err
-		}
-		_, _ = fmt.Fprintf(a.Writer, "%s %s\n\n", "Incorrect Usage.", err.Error())
-		_ = ShowSubcommandHelp(context)
-		return err
+		return a.helpOnError(ShowSubcommandHelp, context, showHelpError{err})
 	}
 
 	if len(a.Commands) > 0 {
@@ -392,14 +401,13 @@ func (a *App) RunAsSubcommand(ctx *Context) (err error) {
 
 	cerr := checkRequiredFlags(a.Flags, context)
 	if cerr != nil {
-		_ = ShowSubcommandHelp(context)
+		ShowSubcommandHelp(context)
 		return cerr
 	}
 
 	if a.After != nil {
 		defer func() {
-			afterErr := a.After(context)
-			if afterErr != nil {
+			if afterErr := a.After(context); afterErr != nil {
 				a.handleExitCoder(context, err)
 				if err != nil {
 					err = newMultiError(err, afterErr)
@@ -411,11 +419,8 @@ func (a *App) RunAsSubcommand(ctx *Context) (err error) {
 	}
 
 	if a.Before != nil {
-		beforeErr := a.Before(context)
-		if beforeErr != nil {
-			a.handleExitCoder(context, beforeErr)
-			err = beforeErr
-			return err
+		if err := a.Before(context); err != nil {
+			return a.helpOnError(ShowSubcommandHelp, context, err)
 		}
 	}
 
@@ -517,7 +522,7 @@ func (a *Author) String() string {
 
 // HandleAction attempts to figure out which Action signature was used.  If
 // it's an ActionFunc or a func with the legacy signature for Action, the func
-// is run!
+// is run! Panics on invalid function signature.
 func HandleAction(action interface{}, context *Context) (err error) {
 	switch a := action.(type) {
 	case ActionFunc:
@@ -528,6 +533,5 @@ func HandleAction(action interface{}, context *Context) (err error) {
 		a(context)
 		return nil
 	}
-
-	return errInvalidActionType
+	panic(fmt.Sprintf("invalid Action type '%T', should be 'func(*Context) error'", action))
 }

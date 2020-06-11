@@ -3,9 +3,11 @@ package cli
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
+	"reflect"
 	"strings"
+
+	"github.com/rancher/spur/flag"
 )
 
 // Context is a type that is passed through to
@@ -47,34 +49,30 @@ func (c *Context) NumFlags() int {
 }
 
 // Set sets a context flag to a value.
-func (c *Context) Set(name, value string) error {
+func (c *Context) Set(name string, value interface{}) error {
 	return c.flagSet.Set(name, value)
 }
 
 // IsSet determines if the flag was actually set
 func (c *Context) IsSet(name string) bool {
 	if fs := lookupFlagSet(name, c); fs != nil {
-		if fs := lookupFlagSet(name, c); fs != nil {
-			isSet := false
-			fs.Visit(func(f *flag.Flag) {
-				if f.Name == name {
-					isSet = true
-				}
-			})
-			if isSet {
-				return true
+		isSet := false
+		fs.Visit(func(f *flag.Flag) {
+			if f.Name == name {
+				isSet = true
 			}
+		})
+		if isSet {
+			return true
 		}
-
-		f := lookupFlag(name, c)
-		if f == nil {
-			return false
-		}
-
-		return f.IsSet()
 	}
 
-	return false
+	f := lookupFlag(name, c)
+	if f == nil {
+		return false
+	}
+	loadedValue, ok := getFlagLoadedValue(f)
+	return ok && loadedValue
 }
 
 // LocalFlagNames returns a slice of flag names used in this context.
@@ -122,6 +120,28 @@ func (c *Context) NArg() int {
 	return c.Args().Len()
 }
 
+// Lookup will return the value for a flag, or the default value if
+// the flag value does not exist or is not of the same type
+func (c *Context) Lookup(name string, defaultVal interface{}) interface{} {
+	var result interface{}
+	if fs := lookupFlagSet(name, c); fs != nil {
+		if f := fs.Lookup(name); f != nil {
+			result = f.Value
+		}
+	}
+	if result == nil {
+		return defaultVal
+	}
+	// if we don't have a default value assume they want they flag.Value
+	if defaultVal != nil {
+		result = result.(flag.Getter).Get()
+	}
+	if defaultVal == nil || reflect.TypeOf(result) == reflect.TypeOf(defaultVal) {
+		return result
+	}
+	return defaultVal
+}
+
 func lookupFlag(name string, ctx *Context) Flag {
 	for _, c := range ctx.Lineage() {
 		if c.Command == nil {
@@ -129,7 +149,7 @@ func lookupFlag(name string, ctx *Context) Flag {
 		}
 
 		for _, f := range c.Command.Flags {
-			for _, n := range f.Names() {
+			for _, n := range FlagNames(f) {
 				if n == name {
 					return f
 				}
@@ -139,7 +159,7 @@ func lookupFlag(name string, ctx *Context) Flag {
 
 	if ctx.App != nil {
 		for _, f := range ctx.App.Flags {
-			for _, n := range f.Names() {
+			for _, n := range FlagNames(f) {
 				if n == name {
 					return f
 				}
@@ -161,12 +181,7 @@ func lookupFlagSet(name string, ctx *Context) *flag.FlagSet {
 }
 
 func copyFlag(name string, ff *flag.Flag, set *flag.FlagSet) {
-	switch ff.Value.(type) {
-	case Serializer:
-		_ = set.Set(name, ff.Value.(Serializer).Serialize())
-	default:
-		_ = set.Set(name, ff.Value.String())
-	}
+	set.Set(name, ff.Value.String())
 }
 
 func normalizeFlags(flags []Flag, set *flag.FlagSet) error {
@@ -175,7 +190,7 @@ func normalizeFlags(flags []Flag, set *flag.FlagSet) error {
 		visited[f.Name] = true
 	})
 	for _, f := range flags {
-		parts := f.Names()
+		parts := FlagNames(f)
 		if len(parts) == 1 {
 			continue
 		}
@@ -245,11 +260,11 @@ func (e *errRequiredFlags) getMissingFlags() []string {
 func checkRequiredFlags(flags []Flag, context *Context) requiredFlagsErr {
 	var missingFlags []string
 	for _, f := range flags {
-		if rf, ok := f.(RequiredFlag); ok && rf.IsRequired() {
+		if required, ok := getFlagRequired(f); ok && required {
 			var flagPresent bool
 			var flagName string
 
-			for _, key := range f.Names() {
+			for _, key := range FlagNames(f) {
 				if len(key) > 1 {
 					flagName = key
 				}

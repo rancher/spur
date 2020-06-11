@@ -44,6 +44,7 @@ type data struct {
 	Elem       string
 	Name       string
 	Title      string
+	LongName   string
 	IsSlice    bool
 	TakesValue bool
 }
@@ -153,9 +154,11 @@ func genTemplateInfo(path, t string) data {
 	}
 
 	isSliceInfo := false
+	longNameInfo := nameInfo
 
 	if strings.HasPrefix(typeInfo, "[]") {
 		nameInfo = fmt.Sprintf("%sSlice", nameInfo)
+		longNameInfo = fmt.Sprintf("%s slice", longNameInfo)
 		isSliceInfo = true
 	}
 
@@ -166,6 +169,7 @@ func genTemplateInfo(path, t string) data {
 		Elem:       elemInfo,
 		Name:       nameInfo,
 		Title:      titleInfo,
+		LongName:   longNameInfo,
 		IsSlice:    isSliceInfo,
 		TakesValue: elemInfo != "bool",
 	}

@@ -9,8 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/urfave/cli/v2"
-
+	"github.com/rancher/spur/cli"
 	"gopkg.in/yaml.v2"
 )
 
@@ -18,21 +17,21 @@ type yamlSourceContext struct {
 	FilePath string
 }
 
-// NewYamlSourceFromFile creates a new Yaml InputSourceContext from a filepath.
-func NewYamlSourceFromFile(file string) (InputSourceContext, error) {
+// NewYamlSourceFromFile creates a new Yaml cli.InputSourceContext from a filepath.
+func NewYamlSourceFromFile(file string) (cli.InputSourceContext, error) {
 	ysc := &yamlSourceContext{FilePath: file}
 	var results map[interface{}]interface{}
 	err := readCommandYaml(ysc.FilePath, &results)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to load Yaml file '%s': inner error: \n'%v'", ysc.FilePath, err.Error())
+		return nil, fmt.Errorf("unable to load yaml file '%s': %s", ysc.FilePath, err)
 	}
 
 	return &MapInputSource{file: file, valueMap: results}, nil
 }
 
-// NewYamlSourceFromFlagFunc creates a new Yaml InputSourceContext from a provided flag name and source context.
-func NewYamlSourceFromFlagFunc(flagFileName string) func(context *cli.Context) (InputSourceContext, error) {
-	return func(context *cli.Context) (InputSourceContext, error) {
+// NewYamlSourceFromFlagFunc creates a new Yaml cli.InputSourceContext from a provided flag name and source context.
+func NewYamlSourceFromFlagFunc(flagFileName string) func(context *cli.Context) (cli.InputSourceContext, error) {
+	return func(context *cli.Context) (cli.InputSourceContext, error) {
 		if context.IsSet(flagFileName) {
 			filePath := context.String(flagFileName)
 			return NewYamlSourceFromFile(filePath)
@@ -42,19 +41,12 @@ func NewYamlSourceFromFlagFunc(flagFileName string) func(context *cli.Context) (
 	}
 }
 
-func readCommandYaml(filePath string, container interface{}) (err error) {
+func readCommandYaml(filePath string, container interface{}) error {
 	b, err := loadDataFrom(filePath)
 	if err != nil {
 		return err
 	}
-
-	err = yaml.Unmarshal(b, container)
-	if err != nil {
-		return err
-	}
-
-	err = nil
-	return
+	return yaml.Unmarshal(b, container)
 }
 
 func loadDataFrom(filePath string) ([]byte, error) {
@@ -76,13 +68,13 @@ func loadDataFrom(filePath string) ([]byte, error) {
 		}
 	} else if u.Path != "" { // i dont have a host, but I have a path. I am a local file.
 		if _, notFoundFileErr := os.Stat(filePath); notFoundFileErr != nil {
-			return nil, fmt.Errorf("Cannot read from file: '%s' because it does not exist.", filePath)
+			return nil, fmt.Errorf("cannot read from file: '%s' because it does not exist", filePath)
 		}
 		return ioutil.ReadFile(filePath)
 	} else if runtime.GOOS == "windows" && strings.Contains(u.String(), "\\") {
 		// on Windows systems u.Path is always empty, so we need to check the string directly.
 		if _, notFoundFileErr := os.Stat(filePath); notFoundFileErr != nil {
-			return nil, fmt.Errorf("Cannot read from file: '%s' because it does not exist.", filePath)
+			return nil, fmt.Errorf("cannot read from file: '%s' because it does not exist", filePath)
 		}
 		return ioutil.ReadFile(filePath)
 	}

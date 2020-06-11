@@ -138,7 +138,7 @@ func printFlagSuggestions(lastArg string, flags []Flag, writer io.Writer) {
 		if bflag, ok := flag.(*BoolFlag); ok && bflag.Hidden {
 			continue
 		}
-		for _, name := range flag.Names() {
+		for _, name := range FlagNames(flag) {
 			name = strings.TrimSpace(name)
 			// this will get total count utf8 letters in flag name
 			count := utf8.RuneCountInString(name)
@@ -290,7 +290,7 @@ func printHelp(out io.Writer, templ string, data interface{}) {
 
 func checkVersion(c *Context) bool {
 	found := false
-	for _, name := range VersionFlag.Names() {
+	for _, name := range FlagNames(VersionFlag) {
 		if c.Bool(name) {
 			found = true
 		}
@@ -300,7 +300,7 @@ func checkVersion(c *Context) bool {
 
 func checkHelp(c *Context) bool {
 	found := false
-	for _, name := range HelpFlag.Names() {
+	for _, name := range FlagNames(HelpFlag) {
 		if c.Bool(name) {
 			found = true
 		}

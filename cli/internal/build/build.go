@@ -13,7 +13,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/rancher/spur/cli"
 )
 
 var packages = []string{"cli", "altsrc"}

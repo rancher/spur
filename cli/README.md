@@ -36,7 +36,7 @@ $ GO111MODULE=on go get github.com/urfave/cli/v2
 ```go
 ...
 import (
-  "github.com/urfave/cli/v2" // imports as package "cli"
+  "github.com/rancher/spur/cli" // imports as package "cli"
 )
 ...
 ```

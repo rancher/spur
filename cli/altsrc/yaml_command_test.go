@@ -1,12 +1,12 @@
 package altsrc
 
 import (
-	"flag"
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/urfave/cli/v2"
+	"github.com/rancher/spur/cli"
+	"github.com/rancher/spur/flag"
 )
 
 func TestCommandYamlFileTest(t *testing.T) {
@@ -30,7 +30,7 @@ func TestCommandYamlFileTest(t *testing.T) {
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "test"}),
+			&cli.IntFlag{Name: "test"},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
@@ -63,7 +63,7 @@ func TestCommandYamlFileTestGlobalEnvVarWins(t *testing.T) {
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "test", EnvVars: []string{"THE_TEST"}}),
+			&cli.IntFlag{Name: "test", EnvVars: []string{"THE_TEST"}},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
@@ -98,7 +98,7 @@ func TestCommandYamlFileTestGlobalEnvVarWinsNested(t *testing.T) {
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "top.test", EnvVars: []string{"THE_TEST"}}),
+			&cli.IntFlag{Name: "top.test", EnvVars: []string{"THE_TEST"}},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
@@ -130,7 +130,7 @@ func TestCommandYamlFileTestSpecifiedFlagWins(t *testing.T) {
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "test"}),
+			&cli.IntFlag{Name: "test"},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
@@ -163,7 +163,7 @@ func TestCommandYamlFileTestSpecifiedFlagWinsNested(t *testing.T) {
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "top.test"}),
+			&cli.IntFlag{Name: "top.test"},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
@@ -195,7 +195,7 @@ func TestCommandYamlFileTestDefaultValueFileWins(t *testing.T) {
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "test", Value: 7}),
+			&cli.IntFlag{Name: "test", Value: 7},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
@@ -228,7 +228,7 @@ func TestCommandYamlFileTestDefaultValueFileWinsNested(t *testing.T) {
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "top.test", Value: 7}),
+			&cli.IntFlag{Name: "top.test", Value: 7},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
@@ -263,7 +263,7 @@ func TestCommandYamlFileFlagHasDefaultGlobalEnvYamlSetGlobalEnvWins(t *testing.T
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "test", Value: 7, EnvVars: []string{"THE_TEST"}}),
+			&cli.IntFlag{Name: "test", Value: 7, EnvVars: []string{"THE_TEST"}},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
@@ -298,7 +298,7 @@ func TestCommandYamlFileFlagHasDefaultGlobalEnvYamlSetGlobalEnvWinsNested(t *tes
 			return nil
 		},
 		Flags: []cli.Flag{
-			NewIntFlag(&cli.IntFlag{Name: "top.test", Value: 7, EnvVars: []string{"THE_TEST"}}),
+			&cli.IntFlag{Name: "top.test", Value: 7, EnvVars: []string{"THE_TEST"}},
 			&cli.StringFlag{Name: "load"}},
 	}
 	command.Before = InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))

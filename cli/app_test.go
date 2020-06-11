@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,6 +10,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/rancher/spur/flag"
 )
 
 var (
@@ -766,8 +767,8 @@ func TestApp_ParseSliceFlags(t *testing.T) {
 			{
 				Name: "cmd",
 				Flags: []Flag{
-					&IntSliceFlag{Name: "p", Value: NewIntSlice(), Usage: "set one or more ip addr"},
-					&StringSliceFlag{Name: "ip", Value: NewStringSlice(), Usage: "set one or more ports to open"},
+					&IntSliceFlag{Name: "p", Usage: "set one or more ip addr"},
+					&StringSliceFlag{Name: "ip", Usage: "set one or more ports to open"},
 				},
 				Action: func(c *Context) error {
 					parsedIntSlice = c.IntSlice("p")
@@ -1935,32 +1936,16 @@ func TestApp_OnUsageError_WithWrongFlagValue_ForSubcommand(t *testing.T) {
 // A custom flag that conforms to the relevant interfaces, but has none of the
 // fields that the other flag types do.
 type customBoolFlag struct {
-	Nombre string
+	Name string
 }
 
 // Don't use the normal FlagStringer
 func (c *customBoolFlag) String() string {
-	return "***" + c.Nombre + "***"
-}
-
-func (c *customBoolFlag) Names() []string {
-	return []string{c.Nombre}
-}
-
-func (c *customBoolFlag) TakesValue() bool {
-	return false
-}
-
-func (c *customBoolFlag) GetValue() string {
-	return "value"
-}
-
-func (c *customBoolFlag) GetUsage() string {
-	return "usage"
+	return "***" + c.Name + "***"
 }
 
 func (c *customBoolFlag) Apply(set *flag.FlagSet) error {
-	set.String(c.Nombre, c.Nombre, "")
+	set.String(c.Name, c.Name, "")
 	return nil
 }
 
@@ -2068,8 +2053,8 @@ func TestShellCompletionForIncompleteFlags(t *testing.T) {
 			}
 
 			for _, fl := range ctx.App.Flags {
-				for _, name := range fl.Names() {
-					if name == BashCompletionFlag.Names()[0] {
+				for _, name := range FlagNames(fl) {
+					if name == FlagNames(BashCompletionFlag)[0] {
 						continue
 					}
 

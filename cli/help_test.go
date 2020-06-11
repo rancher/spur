@@ -2,13 +2,14 @@ package cli
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/rancher/spur/flag"
 )
 
 func Test_ShowAppHelp_NoAuthor(t *testing.T) {

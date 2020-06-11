@@ -5,21 +5,25 @@ import (
 	"time"
 )
 
-func TestMapDuration(t *testing.T) {
+func TestMap(t *testing.T) {
 	inputSource := &MapInputSource{
 		file: "test",
 		valueMap: map[interface{}]interface{}{
-			"duration_of_duration_type": time.Minute,
-			"duration_of_string_type":   "1m",
-			"duration_of_int_type":      1000,
+			"thing_of_duration_type": time.Minute,
+			"thing_of_string_type":   "1m",
+			"thing_of_int_type":      1000,
 		},
 	}
-	d, err := inputSource.Duration("duration_of_duration_type")
+	d, ok := inputSource.Get("thing_of_duration_type")
 	expect(t, time.Minute, d)
-	expect(t, nil, err)
-	d, err = inputSource.Duration("duration_of_string_type")
-	expect(t, time.Minute, d)
-	expect(t, nil, err)
-	_, err = inputSource.Duration("duration_of_int_type")
-	refute(t, nil, err)
+	expect(t, true, ok)
+	d, ok = inputSource.Get("thing_of_string_type")
+	expect(t, "1m", d)
+	expect(t, true, ok)
+	d, ok = inputSource.Get("thing_of_int_type")
+	expect(t, 1000, d)
+	expect(t, true, ok)
+	d, ok = inputSource.Get("thing_of_no_type")
+	expect(t, nil, d)
+	expect(t, false, ok)
 }

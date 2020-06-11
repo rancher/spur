@@ -9,6 +9,8 @@ import (
 	"text/template"
 
 	"github.com/cpuguy83/go-md2man/v2/md2man"
+	"github.com/rancher/spur/flag"
+	"github.com/rancher/spur/generic"
 )
 
 // ToMarkdown creates a markdown string for the `*App`
@@ -104,13 +106,9 @@ func prepareFlags(
 ) []string {
 	args := []string{}
 	for _, f := range flags {
-		flag, ok := f.(DocGenerationFlag)
-		if !ok {
-			continue
-		}
 		modifiedArg := opener
 
-		for _, s := range flag.Names() {
+		for _, s := range FlagNames(f) {
 			trimmed := strings.TrimSpace(s)
 			if len(modifiedArg) > len(opener) {
 				modifiedArg += sep
@@ -122,12 +120,12 @@ func prepareFlags(
 			}
 		}
 		modifiedArg += closer
-		if flag.TakesValue() {
+		if v, ok := getFlagValue(f); ok && !flag.IsBoolValue(v) {
 			modifiedArg += fmt.Sprintf("=%s", value)
 		}
 
 		if addDetails {
-			modifiedArg += flagDetails(flag)
+			modifiedArg += flagDetails(f)
 		}
 
 		args = append(args, modifiedArg+"\n")
@@ -138,11 +136,23 @@ func prepareFlags(
 }
 
 // flagDetails returns a string containing the flags metadata
-func flagDetails(flag DocGenerationFlag) string {
-	description := flag.GetUsage()
-	value := flag.GetValue()
-	if value != "" {
-		description += " (default: " + value + ")"
+func flagDetails(f Flag) string {
+	description, _ := getFlagUsage(f)
+	value, _ := getFlagValue(f)
+	valStr := ""
+
+	if !flag.IsBoolValue(value) {
+		if v, ok := value.(Generic); ok {
+			valStr = v.String()
+		} else if s, ok := generic.ToString(value); ok {
+			valStr = s
+		} else {
+			valStr = fmt.Sprintf("%v", value)
+		}
+	}
+
+	if valStr != "" {
+		description += " (default: " + valStr + ")"
 	}
 	return ": " + description
 }
