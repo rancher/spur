@@ -142,31 +142,28 @@ func (c *Context) Lookup(name string, defaultVal interface{}) interface{} {
 	return defaultVal
 }
 
+// GetFlags will return all of the flags found for this context
+func (c *Context) GetFlags() []Flag {
+	flags := []Flag{}
+	for _, ctx := range c.Lineage() {
+		if ctx.Command != nil {
+			flags = append(flags, ctx.Command.Flags...)
+		}
+	}
+	if c.App != nil {
+		flags = append(flags, c.App.Flags...)
+	}
+	return flags
+}
+
 func lookupFlag(name string, ctx *Context) Flag {
-	for _, c := range ctx.Lineage() {
-		if c.Command == nil {
-			continue
-		}
-
-		for _, f := range c.Command.Flags {
-			for _, n := range FlagNames(f) {
-				if n == name {
-					return f
-				}
+	for _, f := range ctx.GetFlags() {
+		for _, n := range FlagNames(f) {
+			if n == name {
+				return f
 			}
 		}
 	}
-
-	if ctx.App != nil {
-		for _, f := range ctx.App.Flags {
-			for _, n := range FlagNames(f) {
-				if n == name {
-					return f
-				}
-			}
-		}
-	}
-
 	return nil
 }
 

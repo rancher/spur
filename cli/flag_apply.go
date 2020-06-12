@@ -84,33 +84,6 @@ func applyElem(ptr interface{}, val string) error {
 	return nil
 }
 
-// ApplyInputSourceValue will attempt to apply an input source to a generic flag
-func ApplyInputSourceValue(f Flag, context *Context, isc InputSourceContext) error {
-	name, _ := getFlagName(f)
-	envVars, _ := getFlagEnvVars(f)
-	skipAltSrc, _ := getFlagSkipAltSrc(f)
-
-	if !skipAltSrc && context.flagSet != nil {
-		if !context.IsSet(name) && !isEnvVarSet(envVars) {
-			value, ok := isc.Get(name)
-			if !ok || value == nil {
-				return nil
-			}
-			// if a generic flag.Value get the string representation
-			if v, ok := value.(flag.Value); ok {
-				value = v.String()
-			}
-			for _, name := range FlagNames(f) {
-				// sets the new value from some source
-				if err := context.flagSet.Set(name, value); err != nil {
-					return fmt.Errorf("unable to apply input source '%s': %s", isc.Source(), err)
-				}
-			}
-		}
-	}
-	return nil
-}
-
 func flagFromEnvOrFile(envVars []string, filePath string) (val string, ok bool) {
 	for _, envVar := range envVars {
 		envVar = strings.TrimSpace(envVar)
@@ -124,16 +97,4 @@ func flagFromEnvOrFile(envVars []string, filePath string) (val string, ok bool) 
 		}
 	}
 	return "", false
-}
-
-func isEnvVarSet(envVars []string) bool {
-	for _, envVar := range envVars {
-		if _, ok := syscall.Getenv(envVar); ok {
-			// TODO: Can't use this for bools as
-			// set means that it was true or false based on
-			// Bool flag type, should work for other types
-			return true
-		}
-	}
-	return false
 }
