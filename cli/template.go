@@ -26,7 +26,7 @@ COMMANDS:{{range .VisibleCategories}}{{if .Name}}
 
 GLOBAL OPTIONS:
    {{range $index, $option := .VisibleFlags}}{{if $index}}
-   {{end}}{{$option}}{{end}}{{end}}{{if .Copyright}}
+   {{end}}{{FlagToString $option}}{{end}}{{end}}{{if .Copyright}}
 
 COPYRIGHT:
    {{.Copyright}}{{end}}
@@ -48,7 +48,7 @@ DESCRIPTION:
    {{.Description}}{{end}}{{if .VisibleFlags}}
 
 OPTIONS:
-   {{range .VisibleFlags}}{{.}}
+   {{range .VisibleFlags}}{{FlagToString .}}
    {{end}}{{end}}
 `
 
@@ -70,7 +70,7 @@ COMMANDS:{{range .VisibleCategories}}{{if .Name}}
    {{join .Names ", "}}{{"\t"}}{{.Usage}}{{end}}{{end}}{{end}}{{if .VisibleFlags}}
 
 OPTIONS:
-   {{range .VisibleFlags}}{{.}}
+   {{range .VisibleFlags}}{{FlagToString .}}
    {{end}}{{end}}
 `
 

@@ -34,17 +34,6 @@ func (f *TimeSliceFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "time slice", set)
 }
 
-// ApplyInputSourceValue applies a TimeSlice value to the flagSet if required
-func (f *TimeSliceFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *TimeSliceFlag) String() string {
-	return FlagStringer(f)
-}
-
 // TimeSlice looks up the value of a local TimeSliceFlag, returns
 // an empty value if not found
 func (c *Context) TimeSlice(name string) []time.Time {

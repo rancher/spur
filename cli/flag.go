@@ -14,7 +14,6 @@ import (
 
 // Flag is a common interface related to parsing flags in cli.
 type Flag interface {
-	// fmt.Stringer
 	// Apply Flag settings to the given flag set
 	Apply(*flag.FlagSet) error
 }

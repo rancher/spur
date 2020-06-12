@@ -30,17 +30,6 @@ func (f *GenericFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "generic", set)
 }
 
-// ApplyInputSourceValue applies a Generic value to the flagSet if required
-func (f *GenericFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *GenericFlag) String() string {
-	return FlagStringer(f)
-}
-
 // Generic looks up the value of a local GenericFlag, returns
 // an empty value if not found
 func (c *Context) Generic(name string) interface{} {

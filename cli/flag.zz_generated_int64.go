@@ -34,17 +34,6 @@ func (f *Int64Flag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "int64", set)
 }
 
-// ApplyInputSourceValue applies a Int64 value to the flagSet if required
-func (f *Int64Flag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *Int64Flag) String() string {
-	return FlagStringer(f)
-}
-
 // Int64 looks up the value of a local Int64Flag, returns
 // an empty value if not found
 func (c *Context) Int64(name string) int64 {

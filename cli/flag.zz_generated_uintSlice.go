@@ -34,17 +34,6 @@ func (f *UintSliceFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "uint slice", set)
 }
 
-// ApplyInputSourceValue applies a UintSlice value to the flagSet if required
-func (f *UintSliceFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *UintSliceFlag) String() string {
-	return FlagStringer(f)
-}
-
 // UintSlice looks up the value of a local UintSliceFlag, returns
 // an empty value if not found
 func (c *Context) UintSlice(name string) []uint {

@@ -34,17 +34,6 @@ func (f *DurationSliceFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "duration slice", set)
 }
 
-// ApplyInputSourceValue applies a DurationSlice value to the flagSet if required
-func (f *DurationSliceFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *DurationSliceFlag) String() string {
-	return FlagStringer(f)
-}
-
 // DurationSlice looks up the value of a local DurationSliceFlag, returns
 // an empty value if not found
 func (c *Context) DurationSlice(name string) []time.Duration {

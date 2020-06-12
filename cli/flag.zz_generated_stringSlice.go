@@ -34,17 +34,6 @@ func (f *StringSliceFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "string slice", set)
 }
 
-// ApplyInputSourceValue applies a StringSlice value to the flagSet if required
-func (f *StringSliceFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *StringSliceFlag) String() string {
-	return FlagStringer(f)
-}
-
 // StringSlice looks up the value of a local StringSliceFlag, returns
 // an empty value if not found
 func (c *Context) StringSlice(name string) []string {

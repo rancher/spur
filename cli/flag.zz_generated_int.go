@@ -34,17 +34,6 @@ func (f *IntFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "int", set)
 }
 
-// ApplyInputSourceValue applies a Int value to the flagSet if required
-func (f *IntFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *IntFlag) String() string {
-	return FlagStringer(f)
-}
-
 // Int looks up the value of a local IntFlag, returns
 // an empty value if not found
 func (c *Context) Int(name string) int {

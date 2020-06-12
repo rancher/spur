@@ -34,17 +34,6 @@ func (f *BoolSliceFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "bool slice", set)
 }
 
-// ApplyInputSourceValue applies a BoolSlice value to the flagSet if required
-func (f *BoolSliceFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *BoolSliceFlag) String() string {
-	return FlagStringer(f)
-}
-
 // BoolSlice looks up the value of a local BoolSliceFlag, returns
 // an empty value if not found
 func (c *Context) BoolSlice(name string) []bool {

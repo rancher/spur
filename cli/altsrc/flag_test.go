@@ -12,7 +12,7 @@ import (
 )
 
 type testApplyInputSource struct {
-	Flag               FlagInputSourceExtension
+	Flag               cli.Flag
 	FlagName           string
 	FlagSetName        string
 	Expected           string
@@ -286,7 +286,7 @@ func runTest(t *testing.T, test testApplyInputSource) *cli.Context {
 	if test.ContextValueString != "" {
 		set.Set(test.FlagName, test.ContextValueString)
 	}
-	test.Flag.ApplyInputSourceValue(c, inputSource)
+	cli.ApplyInputSourceValue(test.Flag, c, inputSource)
 
 	return c
 }

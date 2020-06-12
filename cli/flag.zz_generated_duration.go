@@ -34,17 +34,6 @@ func (f *DurationFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "duration", set)
 }
 
-// ApplyInputSourceValue applies a Duration value to the flagSet if required
-func (f *DurationFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *DurationFlag) String() string {
-	return FlagStringer(f)
-}
-
 // Duration looks up the value of a local DurationFlag, returns
 // an empty value if not found
 func (c *Context) Duration(name string) time.Duration {

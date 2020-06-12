@@ -15,18 +15,19 @@ type FlagInputSourceExtension interface {
 // executes ApplyInputSourceValue on flags implementing the
 // FlagInputSourceExtension interface to initialize these flags
 // to an alternate input source.
-func ApplyInputSourceValues(context *cli.Context, inputSourceContext cli.InputSourceContext, flags []cli.Flag) error {
+func ApplyInputSourceValues(context *cli.Context, inputSourceContext cli.InputSourceContext, flags []cli.Flag) (err error) {
 	for _, f := range flags {
 		inputSourceExtendedFlag, isType := f.(FlagInputSourceExtension)
 		if isType {
-			err := inputSourceExtendedFlag.ApplyInputSourceValue(context, inputSourceContext)
-			if err != nil {
-				return err
-			}
+			err = inputSourceExtendedFlag.ApplyInputSourceValue(context, inputSourceContext)
+		} else {
+			err = cli.ApplyInputSourceValue(f, context, inputSourceContext)
+		}
+		if err != nil {
+			return err
 		}
 	}
-
-	return nil
+	return
 }
 
 // InitInputSource is used to to setup an cli.InputSourceContext on a cli.Command Before method. It will create a new

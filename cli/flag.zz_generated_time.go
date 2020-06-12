@@ -34,17 +34,6 @@ func (f *TimeFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "time", set)
 }
 
-// ApplyInputSourceValue applies a Time value to the flagSet if required
-func (f *TimeFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *TimeFlag) String() string {
-	return FlagStringer(f)
-}
-
 // Time looks up the value of a local TimeFlag, returns
 // an empty value if not found
 func (c *Context) Time(name string) time.Time {

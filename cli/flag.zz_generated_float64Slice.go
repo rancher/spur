@@ -34,17 +34,6 @@ func (f *Float64SliceFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "float64 slice", set)
 }
 
-// ApplyInputSourceValue applies a Float64Slice value to the flagSet if required
-func (f *Float64SliceFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *Float64SliceFlag) String() string {
-	return FlagStringer(f)
-}
-
 // Float64Slice looks up the value of a local Float64SliceFlag, returns
 // an empty value if not found
 func (c *Context) Float64Slice(name string) []float64 {

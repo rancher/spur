@@ -34,17 +34,6 @@ func (f *Int64SliceFlag) Apply(set *flag.FlagSet) error {
 	return Apply(f, "int64 slice", set)
 }
 
-// ApplyInputSourceValue applies a Int64Slice value to the flagSet if required
-func (f *Int64SliceFlag) ApplyInputSourceValue(context *Context, isc InputSourceContext) error {
-	return ApplyInputSourceValue(f, context, isc)
-}
-
-// String returns a readable representation of this value
-// (for usage defaults)
-func (f *Int64SliceFlag) String() string {
-	return FlagStringer(f)
-}
-
 // Int64Slice looks up the value of a local Int64SliceFlag, returns
 // an empty value if not found
 func (c *Context) Int64Slice(name string) []int64 {

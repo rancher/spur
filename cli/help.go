@@ -257,13 +257,23 @@ func ShowCommandCompletions(ctx *Context, command string) {
 
 }
 
+// FlagToString will convert a flag to a string, using either it's String()
+// function, or FlagStringer if String() is not defined
+func FlagToString(f Flag) string {
+	if stringer, ok := f.(fmt.Stringer); ok {
+		return stringer.String()
+	}
+	return FlagStringer(f)
+}
+
 // printHelpCustom is the default implementation of HelpPrinterCustom.
 //
 // The customFuncs map will be combined with a default template.FuncMap to
 // allow using arbitrary functions in template rendering.
 func printHelpCustom(out io.Writer, templ string, data interface{}, customFuncs map[string]interface{}) {
 	funcMap := template.FuncMap{
-		"join": strings.Join,
+		"join":         strings.Join,
+		"FlagToString": FlagToString,
 	}
 	for key, value := range customFuncs {
 		funcMap[key] = value
