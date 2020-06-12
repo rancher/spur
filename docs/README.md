@@ -1,5 +1,39 @@
-cli v2 manual
+spur/cli
+
 ===
+
+[![GoDoc](https://godoc.org/github.com/rancher/spur?status.svg)](https://godoc.org/github.com/rancher/spur)
+[![codebeat](https://codebeat.co/badges/0a8f30aa-f975-404b-b878-5fab3ae1cc5f)](https://codebeat.co/projects/github-com-rancher-spur)
+[![Go Report Card](https://goreportcard.com/badge/rancher/spur)](https://goreportcard.com/report/rancher/spur)
+[![codecov](https://codecov.io/gh/rancher/spur/branch/master/graph/badge.svg)](https://codecov.io/gh/rancher/spur)
+
+spur/cli is a simple, fast, and fun package for building command line apps in Go. The
+goal is to enable developers to write fast and distributable command line
+applications in an expressive way.
+
+## Installation
+
+Using this package requires a working Go environment. [See the install instructions for Go](http://golang.org/doc/install.html).
+
+Go Modules are required when using this package. [See the go blog guide on using Go Modules](https://blog.golang.org/using-go-modules).
+
+```
+$ GO111MODULE=on go get github.com/rancher/spur
+```
+
+```go
+...
+import (
+  "github.com/rancher/spur/cli"
+)
+...
+```
+
+### Supported platforms
+
+cli is tested against multiple versions of Go on Linux, and against the latest
+released version of Go on OS X and Windows. This project uses Github Actions for
+builds. To see our currently supported go versions and platforms, look at the [./.github/workflows/cli.yml](https://github.com/rancher/spur/blob/master/.github/workflows/cli.yml).
 
 <!-- toc -->
 
@@ -61,7 +95,7 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -83,7 +117,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -126,7 +160,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -191,7 +225,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -224,7 +258,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -271,7 +305,7 @@ import (
   "os"
   "fmt"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -307,7 +341,7 @@ func main() {
 }
 ```
 
-See full list of flags at http://godoc.org/github.com/urfave/cli
+See full list of flags at http://godoc.org/github.com/rancher/spur/tree/master/cli
 
 #### Placeholder Values
 
@@ -327,7 +361,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -373,7 +407,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -419,7 +453,7 @@ import (
   "os"
   "sort"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -487,7 +521,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -524,7 +558,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -562,7 +596,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -633,8 +667,8 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli/v2"
-  "github.com/urfave/cli/v2/altsrc"
+  "github.com/rancher/spur/cli"
+  "github.com/rancher/spur/cli/altsrc"
 )
 
 func main() {
@@ -672,7 +706,7 @@ package main
 import (
   "log"
   "os"
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -728,7 +762,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -781,7 +815,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -853,7 +887,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -907,7 +941,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -958,7 +992,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -1018,7 +1052,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"github.com/urfave/cli/v2"
+	"github.com/rancher/spur/cli"
 )
 func main() {
 	app := cli.NewApp()
@@ -1087,7 +1121,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -1186,7 +1220,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -1247,7 +1281,7 @@ import (
   "io"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -1304,7 +1338,7 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -1339,7 +1373,7 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -1369,7 +1403,7 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 var (
@@ -1405,7 +1439,7 @@ import (
   "log"
   "os"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func main() {
@@ -1452,7 +1486,7 @@ import (
   "os"
   "time"
 
-  "github.com/urfave/cli/v2"
+  "github.com/rancher/spur/cli"
 )
 
 func init() {
