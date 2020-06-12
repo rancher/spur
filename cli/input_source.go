@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"syscall"
 
 	"github.com/rancher/spur/flag"
 )
@@ -20,11 +19,10 @@ type InputSourceContext interface {
 // ApplyInputSourceValue will attempt to apply an input source to a generic flag
 func ApplyInputSourceValue(f Flag, context *Context, isc InputSourceContext) error {
 	name, _ := getFlagName(f)
-	envVars, _ := getFlagEnvVars(f)
 	skipAltSrc, _ := getFlagSkipAltSrc(f)
 
 	if !skipAltSrc && context.flagSet != nil {
-		if !context.IsSet(name) && !isEnvVarSet(envVars) {
+		if isLoaded, _ := getFlagLoadedValue(f); !isLoaded && !context.IsSet(name) {
 			value, ok := isc.Get(name)
 			if !ok || value == nil {
 				return nil
@@ -79,16 +77,4 @@ func InitAllInputSource(createInputSource func(context *Context) (InputSourceCon
 		}
 		return ApplyInputSourceValues(context, inputSource, context.GetFlags())
 	}
-}
-
-func isEnvVarSet(envVars []string) bool {
-	for _, envVar := range envVars {
-		if _, ok := syscall.Getenv(envVar); ok {
-			// TODO: Can't use this for bools as
-			// set means that it was true or false based on
-			// Bool flag type, should work for other types
-			return true
-		}
-	}
-	return false
 }
