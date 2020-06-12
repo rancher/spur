@@ -46,7 +46,7 @@ builds. To see our currently supported go versions and platforms, look at the [.
     + [Ordering](#ordering)
     + [Values from the Environment](#values-from-the-environment)
     + [Values from files](#values-from-files)
-    + [Values from alternate input sources (YAML, TOML, and others)](#values-from-alternate-input-sources-yaml-toml-and-others)
+    + [Values from alternate input sources](#values-from-alternate-input-sources)
     + [Required Flags](#required-flags)
     + [Default Values for help output](#default-values-for-help-output)
     + [Precedence](#precedence)
@@ -67,7 +67,7 @@ builds. To see our currently supported go versions and platforms, look at the [.
     + [Customization](#customization-1)
   * [Version Flag](#version-flag)
     + [Customization](#customization-2)
-  * [Timestamp Flag](#timestamp-flag)
+  * [Time Flag](#time-flag)
   * [Full API Example](#full-api-example)
 
 <!-- tocstop -->
@@ -619,15 +619,14 @@ func main() {
 Note that default values set from file (e.g. `FilePath`) take precedence over
 default values set from the environment (e.g. `EnvVar`).
 
-#### Values from alternate input sources (YAML, TOML, and others)
+#### Values from alternate input sources
 
 There is a separate package altsrc that adds support for getting flag values
 from other file input sources.
 
 Currently supported input source formats:
 * YAML
-* JSON
-* TOML
+* JSON (through YAML)
 
 In order to get values for a flag from an alternate input source the following
 code would be added to wrap an existing cli.Flag like below:
@@ -649,7 +648,7 @@ the yaml input source for any flags that are defined on that command.  As a note
 the "load" flag used would also have to be defined on the command flags in order
 for this code snippet to work.
 
-Currently only YAML, JSON, and TOML files are supported but developers can add support
+Currently only YAML and JSON files are supported but developers can add support
 for other input sources by implementing the altsrc.InputSourceContext for their
 given sources.
 
