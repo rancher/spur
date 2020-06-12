@@ -1,5 +1,4 @@
 spur/cli
-
 ===
 
 [![GoDoc](https://godoc.org/github.com/rancher/spur?status.svg)](https://godoc.org/github.com/rancher/spur)
@@ -657,7 +656,7 @@ given sources.
 Here is a more complete sample of a command using YAML support:
 
 <!-- {
-  "args": ["test-cmd", "&#45;&#45;help"],
+  "args": ["&#45;&#45;help"],
   "output": "&#45&#45;test value.*default: 0"
 } -->
 ``` go
@@ -673,7 +672,7 @@ import (
 
 func main() {
   flags := []cli.Flag{
-    altsrc.NewIntFlag(&cli.IntFlag{Name: "test"}),
+    &cli.IntFlag{Name: "test"},
     &cli.StringFlag{Name: "load"},
   }
 
@@ -1049,61 +1048,62 @@ the App or its subcommands as well.
 ```go
 package main
 import (
-	"fmt"
-	"log"
-	"os"
-	"github.com/rancher/spur/cli"
+  "fmt"
+  "log"
+  "os"
+
+  "github.com/rancher/spur/cli"
 )
 func main() {
-	app := cli.NewApp()
-	app.EnableBashCompletion = true
-	app.Commands = []*cli.Command{
-		{
-			Name:    "add",
-			Aliases: []string{"a"},
-			Usage:   "add a task to the list",
-			Action: func(c *cli.Context) error {
-				fmt.Println("added task: ", c.Args().First())
-				return nil
-			},
-		},
-		{
-			Name:    "complete",
-			Aliases: []string{"c"},
-			Usage:   "complete a task on the list",
-			Action: func(c *cli.Context) error {
-				fmt.Println("completed task: ", c.Args().First())
-				return nil
-			},
-		},
-		{
-			Name:    "template",
-			Aliases: []string{"t"},
-			Usage:   "options for task templates",
-			Subcommands: []*cli.Command{
-				{
-					Name:  "add",
-					Usage: "add a new template",
-					Action: func(c *cli.Context) error {
-						fmt.Println("new task template: ", c.Args().First())
-						return nil
-					},
-				},
-				{
-					Name:  "remove",
-					Usage: "remove an existing template",
-					Action: func(c *cli.Context) error {
-						fmt.Println("removed task template: ", c.Args().First())
-						return nil
-					},
-				},
-			},
-		},
-	}
-	err := app.Run(os.Args)
-	if err != nil {
-		log.Fatal(err)
-	}
+  app := cli.NewApp()
+  app.EnableBashCompletion = true
+  app.Commands = []*cli.Command{
+    {
+      Name:    "add",
+      Aliases: []string{"a"},
+      Usage:   "add a task to the list",
+      Action: func(c *cli.Context) error {
+        fmt.Println("added task: ", c.Args().First())
+        return nil
+      },
+    },
+    {
+      Name:    "complete",
+      Aliases: []string{"c"},
+      Usage:   "complete a task on the list",
+      Action: func(c *cli.Context) error {
+        fmt.Println("completed task: ", c.Args().First())
+        return nil
+      },
+    },
+    {
+      Name:    "template",
+      Aliases: []string{"t"},
+      Usage:   "options for task templates",
+      Subcommands: []*cli.Command{
+        {
+          Name:  "add",
+          Usage: "add a new template",
+          Action: func(c *cli.Context) error {
+            fmt.Println("new task template: ", c.Args().First())
+            return nil
+          },
+        },
+        {
+          Name:  "remove",
+          Usage: "remove an existing template",
+          Action: func(c *cli.Context) error {
+            fmt.Println("removed task template: ", c.Args().First())
+            return nil
+          },
+        },
+      },
+    },
+  }
+  err := app.Run(os.Args)
+  if err != nil {
+    log.Fatal(err)
+  }
 }
 ```
 ![](/docs/v2/images/default-bash-autocomplete.gif)
@@ -1423,9 +1423,9 @@ func main() {
 }
 ```
 
-### Timestamp Flag
+### Time Flag
 
-Using the timestamp flag is simple. Please refer to [`time.Parse`](https://golang.org/pkg/time/#example_Parse) to get possible formats.
+Using the time flag is simple. Please refer to [`time.Parse`](https://golang.org/pkg/time/#example_Parse) to get possible formats.
 
 <!-- {
   "args": ["&#45;&#45;meeting", "2019-08-12T15:04:05"],
@@ -1440,15 +1440,19 @@ import (
   "os"
 
   "github.com/rancher/spur/cli"
+  "github.com/rancher/spur/generic"
 )
 
 func main() {
+  // Append our custom time layout to the list of existing layouts
+  generic.TimeLayouts = append(generic.TimeLayouts, "2006-01-02T15:04:05")
+
   app := &cli.App{
     Flags: []cli.Flag {
-      &cli.TimestampFlag{Name: "meeting", Layout: "2006-01-02T15:04:05"},
+      &cli.TimeFlag{Name: "meeting"},
     },
     Action: func(c *cli.Context) error {
-      fmt.Printf("%s", c.Timestamp("meeting").String())
+      fmt.Printf("%s", c.Time("meeting").String())
       return nil
     },
   }
@@ -1479,7 +1483,6 @@ package main
 
 import (
   "errors"
-  "flag"
   "fmt"
   "io"
   "io/ioutil"
@@ -1487,6 +1490,7 @@ import (
   "time"
 
   "github.com/rancher/spur/cli"
+  "github.com/rancher/spur/flag"
 )
 
 func init() {
@@ -1508,7 +1512,7 @@ func init() {
   }
   cli.ErrWriter = ioutil.Discard
   cli.FlagStringer = func(fl cli.Flag) string {
-    return fmt.Sprintf("\t\t%s", fl.Names()[0])
+    return fmt.Sprintf("\t\t%s", cli.FlagNames(fl)[0])
   }
 }
 
@@ -1527,8 +1531,8 @@ type genericType struct {
   s string
 }
 
-func (g *genericType) Set(value string) error {
-  g.s = value
+func (g *genericType) Set(value interface{}) error {
+  g.s = value.(string)
   return nil
 }
 
@@ -1538,8 +1542,8 @@ func (g *genericType) String() string {
 
 func main() {
   app := &cli.App{
-    Name: "kənˈtrīv",
-    Version: "v19.99.0",
+    Name:     "kənˈtrīv",
+    Version:  "v19.99.0",
     Compiled: time.Now(),
     Authors: []*cli.Author{
       &cli.Author{
@@ -1548,8 +1552,8 @@ func main() {
       },
     },
     Copyright: "(c) 1999 Serious Enterprise",
-    HelpName: "contrive",
-    Usage: "demonstrate available API",
+    HelpName:  "contrive",
+    Usage:     "demonstrate available API",
     UsageText: "contrive - demonstrating the available API",
     ArgsUsage: "[args and such]",
     Commands: []*cli.Command{
@@ -1618,8 +1622,8 @@ func main() {
       &cli.Uint64Flag{Name: "bigage"},
     },
     EnableBashCompletion: true,
-    HideHelp: false,
-    HideVersion: false,
+    HideHelp:             false,
+    HideVersion:          false,
     BashComplete: func(c *cli.Context) {
       fmt.Fprintf(c.App.Writer, "lipstick\nkiss\nme\nlipstick\nringo\n")
     },
@@ -1654,11 +1658,11 @@ func main() {
 
       fmt.Printf("%#v\n", c.App.Command("doo"))
       if c.Bool("infinite") {
-      	c.App.Run([]string{"app", "doo", "wop"})
+        c.App.Run([]string{"app", "doo", "wop"})
       }
 
       if c.Bool("forevar") {
-      	c.App.RunAsSubcommand(c)
+        c.App.RunAsSubcommand(c)
       }
       c.App.Setup()
       fmt.Printf("%#v\n", c.App.VisibleCategories())
