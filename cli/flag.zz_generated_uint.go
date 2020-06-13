@@ -23,7 +23,6 @@ type UintFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Uint
 	Destination *Uint

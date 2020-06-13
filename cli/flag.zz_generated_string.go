@@ -23,7 +23,6 @@ type StringFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       String
 	Destination *String

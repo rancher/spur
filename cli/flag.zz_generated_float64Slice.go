@@ -23,7 +23,6 @@ type Float64SliceFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Float64Slice
 	Destination *Float64Slice

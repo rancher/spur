@@ -23,7 +23,6 @@ type Uint64Flag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Uint64
 	Destination *Uint64

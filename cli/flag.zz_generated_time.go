@@ -23,7 +23,6 @@ type TimeFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Time
 	Destination *Time

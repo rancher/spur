@@ -1,7 +1,5 @@
 package cli
 
-import "reflect"
-
 func getFlagName(f Flag) (result string, ok bool) {
 	if v := flagValue(f).FieldByName("Name"); v.IsValid() {
 		return v.Interface().(string), true
@@ -72,13 +70,6 @@ func getFlagSkipAltSrc(f Flag) (result bool, ok bool) {
 	return
 }
 
-func getFlagLoadedValue(f Flag) (result bool, ok bool) {
-	if v := flagValue(f).FieldByName("LoadedValue"); v.IsValid() {
-		return v.Interface().(bool), true
-	}
-	return
-}
-
 func getFlagValue(f Flag) (result interface{}, ok bool) {
 	if v := flagValue(f).FieldByName("Value"); v.IsValid() {
 		return v.Interface(), true
@@ -96,16 +87,6 @@ func getFlagValuePtr(f Flag) (result interface{}, ok bool) {
 func getFlagDestination(f Flag) (result interface{}, ok bool) {
 	if v := flagValue(f).FieldByName("Destination"); v.IsValid() {
 		return v.Interface(), true
-	}
-	return
-}
-
-func setFlagLoadedValue(f Flag, value bool) (ok bool) {
-	if v := flagValue(f).FieldByName("LoadedValue"); v.IsValid() {
-		if _, ok := v.Interface().(bool); ok {
-			v.Set(reflect.ValueOf(value))
-			return true
-		}
 	}
 	return
 }

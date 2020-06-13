@@ -19,7 +19,6 @@ type GenericFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Generic
 	Destination Generic

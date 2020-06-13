@@ -182,6 +182,13 @@ func sortFlags(flags map[string]*Flag) []*Flag {
 
 const invalidValueTemplate = "invalid value %q for flag -%s: %v"
 
+func (f *FlagSet) addActual(name string, flag *Flag) {
+	if f.actual == nil {
+		f.actual = make(map[string]*Flag)
+	}
+	f.actual[name] = flag
+}
+
 // Output returns the destination for usage and error messages. os.Stderr is returned if
 // output was not set or was set to nil.
 func (f *FlagSet) Output() io.Writer {
@@ -229,6 +236,15 @@ func (f *FlagSet) Visit(fn func(*Flag)) {
 	}
 }
 
+// NeedsVisit visits marks the named flags for visit.
+func (f *FlagSet) NeedsVisit(names ...string) {
+	for _, name := range names {
+		if flag := f.Lookup(name); flag != nil {
+			f.addActual(name, flag)
+		}
+	}
+}
+
 // Visit visits the command-line flags in lexicographical order, calling fn
 // for each. It visits only those flags that have been set.
 func Visit(fn func(*Flag)) {
@@ -256,10 +272,7 @@ func (f *FlagSet) Set(name string, value interface{}) error {
 	if err != nil {
 		return fmt.Errorf(invalidValueTemplate, value, name, err)
 	}
-	if f.actual == nil {
-		f.actual = make(map[string]*Flag)
-	}
-	f.actual[name] = flag
+	f.addActual(name, flag)
 	return nil
 }
 

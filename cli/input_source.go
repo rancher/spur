@@ -18,11 +18,11 @@ type InputSourceContext interface {
 
 // ApplyInputSourceValue will attempt to apply an input source to a generic flag
 func ApplyInputSourceValue(f Flag, context *Context, isc InputSourceContext) error {
-	name, _ := getFlagName(f)
+	name := FlagNames(f)[0]
 	skipAltSrc, _ := getFlagSkipAltSrc(f)
 
 	if !skipAltSrc && context.flagSet != nil {
-		if isLoaded, _ := getFlagLoadedValue(f); !isLoaded && !context.IsSet(name) {
+		if !context.IsSet(name) {
 			value, ok := isc.Get(name)
 			if !ok || value == nil {
 				return nil

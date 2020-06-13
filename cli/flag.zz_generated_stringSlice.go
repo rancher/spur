@@ -23,7 +23,6 @@ type StringSliceFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       StringSlice
 	Destination *StringSlice

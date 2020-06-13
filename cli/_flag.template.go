@@ -23,7 +23,6 @@ type Title__Flag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Title__
 	Destination *Title__

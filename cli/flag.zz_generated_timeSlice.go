@@ -23,7 +23,6 @@ type TimeSliceFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       TimeSlice
 	Destination *TimeSlice

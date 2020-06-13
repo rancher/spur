@@ -23,7 +23,6 @@ type Float64Flag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Float64
 	Destination *Float64

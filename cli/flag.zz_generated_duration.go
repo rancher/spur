@@ -23,7 +23,6 @@ type DurationFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Duration
 	Destination *Duration

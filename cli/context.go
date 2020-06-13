@@ -66,13 +66,7 @@ func (c *Context) IsSet(name string) bool {
 			return true
 		}
 	}
-
-	f := lookupFlag(name, c)
-	if f == nil {
-		return false
-	}
-	loadedValue, ok := getFlagLoadedValue(f)
-	return ok && loadedValue
+	return false
 }
 
 // LocalFlagNames returns a slice of flag names used in this context.

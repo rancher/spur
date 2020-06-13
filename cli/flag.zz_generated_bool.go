@@ -23,7 +23,6 @@ type BoolFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Bool
 	Destination *Bool

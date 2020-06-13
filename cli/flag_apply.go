@@ -12,7 +12,7 @@ import (
 
 // Apply will attempt to apply generic flag values to a flagset
 func Apply(f Flag, typ string, set *flag.FlagSet) error {
-	name, _ := getFlagName(f)
+	name := FlagNames(f)[0]
 	value, _ := getFlagValue(f)
 	usage, _ := getFlagUsage(f)
 	envVars, _ := getFlagEnvVars(f)
@@ -30,6 +30,7 @@ func Apply(f Flag, typ string, set *flag.FlagSet) error {
 	if value == nil || generic.ValueOfPtr(value) == nil {
 		value = generic.New(destination)
 	}
+	wasSet := false
 	// load flags from environment or file
 	if val, ok := flagFromEnvOrFile(envVars, filePath); ok {
 		newValue := generic.New(value)
@@ -37,17 +38,21 @@ func Apply(f Flag, typ string, set *flag.FlagSet) error {
 			return fmt.Errorf("could not parse %q as %s value for flag %s: %s", val, typ, name, err)
 		}
 		value = newValue
-		setFlagLoadedValue(f, true)
+		wasSet = true
 	}
-	// for all of the names set the flag value
+	// copy value to destination
+	generic.Set(destination, generic.ValueOfPtr(value))
+	dest, ok := destination.(flag.Value)
+	if !ok {
+		dest = flag.NewGenericValue(destination)
+	}
+	// for all of the names set the flag variable
 	for _, name := range FlagNames(f) {
-		if dest, ok := destination.(flag.Value); ok {
-			// copy generic value
-			generic.Set(dest, generic.ValueOfPtr(value))
-			set.Var(dest, name, usage)
-		} else {
-			set.GenericVar(destination, name, generic.ValueOfPtr(value), usage)
-		}
+		set.Var(dest, name, usage)
+	}
+	// if value is not default mark as needs visit
+	if wasSet {
+		set.NeedsVisit(name)
 	}
 	return nil
 }

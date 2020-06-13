@@ -23,7 +23,6 @@ type IntFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Int
 	Destination *Int

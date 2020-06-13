@@ -23,7 +23,6 @@ type Int64SliceFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       Int64Slice
 	Destination *Int64Slice

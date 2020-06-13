@@ -23,7 +23,6 @@ type UintSliceFlag struct {
 	Hidden      bool
 	TakesFile   bool
 	SkipAltSrc  bool
-	LoadedValue bool
 
 	Value       UintSlice
 	Destination *UintSlice
