@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -64,6 +65,15 @@ func TestFlagsFromEnv(t *testing.T) {
 	timeCustom, _ := time.Parse(timeCustomString, timeCustomString)
 
 	generic.TimeLayouts = append(generic.TimeLayouts, timeCustomString)
+
+	stringToTime := generic.FromStringMap["time.Time"]
+	generic.FromStringMap["time.Time"] = func(s string) (interface{}, error) {
+		if v, err := stringToTime(s); err == nil {
+			return v, nil
+		}
+		v, err := strconv.ParseInt(s, 0, 64)
+		return time.Unix(v, 0), err
+	}
 
 	var flagTests = []struct {
 		input     string

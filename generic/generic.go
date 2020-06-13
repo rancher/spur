@@ -23,7 +23,7 @@ var Unmarshal = yaml.Unmarshal
 type ToStringFunc = func(interface{}) (string, bool)
 
 // FromStringFunc is the function definition for converting strings to types
-type FromStringFunc = func(string, interface{}) error
+type FromStringFunc = func(string) (interface{}, error)
 
 // ToStringMap provides a mapping of type to string conversion function
 var ToStringMap = map[string]ToStringFunc{}
@@ -69,7 +69,12 @@ func FromString(value string, ptr interface{}) error {
 	if fromString == nil {
 		return errParse
 	}
-	return numError(fromString(value, ptr))
+	val, err := fromString(value)
+	if err != nil {
+		return numError(err)
+	}
+	Set(ptr, val)
+	return nil
 }
 
 // TypeOf returns the dereferenced value's type

@@ -30,6 +30,11 @@ func boolString(s string) string {
 }
 
 func TestEverything(t *testing.T) {
+	// replace the existing time formatter
+	generic.FromStringMap["time.Time"] = func(s string) (interface{}, error) {
+		v, err := strconv.ParseInt(s, 0, 64)
+		return time.Unix(v, 0), err
+	}
 	ResetForTesting(nil)
 	Bool("test_bool", false, "bool value")
 	Int("test_int", 0, "int value")

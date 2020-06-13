@@ -10,61 +10,48 @@ import (
 )
 
 func init() {
-	FromStringMap["string"] = func(s string, ptr interface{}) error {
-		Set(ptr, s)
-		return nil
+	FromStringMap["string"] = func(s string) (interface{}, error) {
+		return s, nil
 	}
-	FromStringMap["bool"] = func(s string, ptr interface{}) error {
+	FromStringMap["bool"] = func(s string) (interface{}, error) {
 		if s == "" {
 			s = "false"
 		}
 		v, err := strconv.ParseBool(s)
-		Set(ptr, bool(v))
-		return err
+		return bool(v), err
 	}
-	FromStringMap["int"] = func(s string, ptr interface{}) error {
+	FromStringMap["int"] = func(s string) (interface{}, error) {
 		v, err := strconv.ParseInt(s, 0, strconv.IntSize)
-		Set(ptr, int(v))
-		return err
+		return int(v), err
 	}
-	FromStringMap["int64"] = func(s string, ptr interface{}) error {
+	FromStringMap["int64"] = func(s string) (interface{}, error) {
 		v, err := strconv.ParseInt(s, 0, 64)
-		Set(ptr, int64(v))
-		return err
+		return int64(v), err
 	}
-	FromStringMap["uint"] = func(s string, ptr interface{}) error {
+	FromStringMap["uint"] = func(s string) (interface{}, error) {
 		v, err := strconv.ParseUint(s, 0, strconv.IntSize)
-		Set(ptr, uint(v))
-		return err
+		return uint(v), err
 	}
-	FromStringMap["uint64"] = func(s string, ptr interface{}) error {
+	FromStringMap["uint64"] = func(s string) (interface{}, error) {
 		v, err := strconv.ParseUint(s, 0, 64)
-		Set(ptr, uint64(v))
-		return err
+		return uint64(v), err
 	}
-	FromStringMap["float64"] = func(s string, ptr interface{}) error {
+	FromStringMap["float64"] = func(s string) (interface{}, error) {
 		v, err := strconv.ParseFloat(s, 64)
-		Set(ptr, float64(v))
-		return err
+		return float64(v), err
 	}
-	FromStringMap["time.Duration"] = func(s string, ptr interface{}) error {
+	FromStringMap["time.Duration"] = func(s string) (interface{}, error) {
 		if v, err := time.ParseDuration(s); err == nil {
-			Set(ptr, time.Duration(v))
-			return nil
+			return time.Duration(v), nil
 		}
-		return errParse
+		return nil, errParse
 	}
-	FromStringMap["time.Time"] = func(s string, ptr interface{}) error {
-		if v, err := strconv.ParseInt(s, 0, 64); err == nil {
-			Set(ptr, time.Unix(v, 0))
-			return nil
-		}
+	FromStringMap["time.Time"] = func(s string) (interface{}, error) {
 		for _, layout := range TimeLayouts {
 			if v, err := time.Parse(layout, s); err == nil {
-				Set(ptr, time.Time(v))
-				return nil
+				return time.Time(v), nil
 			}
 		}
-		return errParse
+		return nil, errParse
 	}
 }
