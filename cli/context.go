@@ -2,7 +2,6 @@ package cli
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -189,9 +188,6 @@ func normalizeFlags(flags []Flag, set *flag.FlagSet) error {
 		for _, name := range parts {
 			name = strings.Trim(name, " ")
 			if visited[name] {
-				if ff != nil {
-					return errors.New("Cannot use two forms of the same flag: " + name + " " + ff.Name)
-				}
 				ff = set.Lookup(name)
 			}
 		}
