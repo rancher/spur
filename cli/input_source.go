@@ -23,6 +23,7 @@ func ApplyInputSourceValue(f Flag, context *Context, isc InputSourceContext) err
 
 	if !skipAltSrc && context.flagSet != nil {
 		if !context.IsSet(name) {
+			// only checks the first name of this flag
 			value, ok := isc.Get(name)
 			if !ok || value == nil {
 				return nil
@@ -31,11 +32,9 @@ func ApplyInputSourceValue(f Flag, context *Context, isc InputSourceContext) err
 			if v, ok := value.(flag.Value); ok {
 				value = v.String()
 			}
-			for _, name := range FlagNames(f) {
-				// sets the new value from some source
-				if err := context.flagSet.Set(name, value); err != nil {
-					return fmt.Errorf("unable to apply input source '%s': %s", isc.Source(), err)
-				}
+			// sets the new value from some source
+			if err := context.Set(name, value); err != nil {
+				return fmt.Errorf("unable to apply input source '%s': %s", isc.Source(), err)
 			}
 		}
 	}
