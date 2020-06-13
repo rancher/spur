@@ -236,7 +236,7 @@ func (f *FlagSet) Visit(fn func(*Flag)) {
 	}
 }
 
-// NeedsVisit visits marks the named flags for visit.
+// NeedsVisit marks the named flags for visit.
 func (f *FlagSet) NeedsVisit(names ...string) {
 	for _, name := range names {
 		if flag := f.Lookup(name); flag != nil {
