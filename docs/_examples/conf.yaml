@@ -1,0 +1,8 @@
+test-int: 1
+test-int-slice: [ 1, 2, 3 ]
+test-string-slice: 
+  - 0
+  - a
+  - 1
+  - b
+load: neat

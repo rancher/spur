@@ -4,11 +4,13 @@ spur/cli
 [![GoDoc](https://godoc.org/github.com/rancher/spur?status.svg)](https://godoc.org/github.com/rancher/spur)
 [![codebeat](https://codebeat.co/badges/0a8f30aa-f975-404b-b878-5fab3ae1cc5f)](https://codebeat.co/projects/github-com-rancher-spur)
 [![Go Report Card](https://goreportcard.com/badge/rancher/spur)](https://goreportcard.com/report/rancher/spur)
-[![codecov](https://codecov.io/gh/rancher/spur/branch/master/graph/badge.svg)](https://codecov.io/gh/rancher/spur)
+[![codecov](https://codecov.io/gh/rancher/spur/branch/trunk/graph/badge.svg)](https://codecov.io/gh/rancher/spur)
+
+This project is a fork of [urfave/cli/v2](https://github.com/urfave/cli).
 
 spur/cli is a simple, fast, and fun package for building command line apps in Go. The
 goal is to enable developers to write fast and distributable command line
-applications in an expressive way.
+applications in an expressive, consistent, and simple way.
 
 ## Installation
 
@@ -32,11 +34,12 @@ import (
 
 cli is tested against multiple versions of Go on Linux, and against the latest
 released version of Go on OS X and Windows. This project uses Github Actions for
-builds. To see our currently supported go versions and platforms, look at the [./.github/workflows/cli.yml](https://github.com/rancher/spur/blob/master/.github/workflows/cli.yml).
+builds. To see our currently supported go versions and platforms, look at the [./.github/workflows/cli.yml](https://github.com/rancher/spur/blob/trunk/.github/workflows/cli.yml).
 
 <!-- toc -->
 
-- [Migrating From Older Releases](#migrating-from-older-releases)
+- [Migrating From Other Releases](#migrating-from-other-releases)
+  * [Flags before args](#flags-before-args)
 - [Getting Started](#getting-started)
 - [Examples](#examples)
   * [Arguments](#arguments)
@@ -72,12 +75,29 @@ builds. To see our currently supported go versions and platforms, look at the [.
 
 <!-- tocstop -->
 
-## Migrating From Older Releases
+## Migrating From Other Releases
 
-There are a small set of breaking changes between v1 and v2.
+There are a small set of breaking changes between spur/cli and urfave/cli (v1 or v2).
 Converting is relatively straightforward and typically takes less than
-an hour. Specific steps are included in
-[Migration Guide: v1 to v2](../migrate-v1-to-v2.md).
+an hour. Please see the [examples directory](./_examples/) for examples on layout and syntax difference.
+
+### Flags before args
+
+In spur/cli (as with urfave/v2) flags must come before args. This is more POSIX-compliant.  You
+may need to update scripts, user documentation, etc.
+
+This will work:
+
+```
+cli hello --shout rick
+```
+
+This will not:
+
+```
+cli hello rick --shout
+```
+
 
 ## Getting Started
 
@@ -340,7 +360,7 @@ func main() {
 }
 ```
 
-See full list of flags at http://godoc.org/github.com/rancher/spur/tree/master/cli
+See full list of flags at http://godoc.org/github.com/rancher/spur/tree/trunk/cli
 
 #### Placeholder Values
 
@@ -628,18 +648,11 @@ Currently supported input source formats:
 * YAML
 * JSON (through YAML)
 
-In order to get values for a flag from an alternate input source the following
-code would be added to wrap an existing cli.Flag like below:
-
-``` go
-  altsrc.NewIntFlag(&cli.IntFlag{Name: "test"})
-```
-
 Initialization must also occur for these flags. Below is an example initializing
 getting data from a yaml file below.
 
 ``` go
-  command.Before = altsrc.InitInputSourceWithContext(command.Flags, NewYamlSourceFromFlagFunc("load"))
+  command.Before = cli.InitAllInputSource(altsrc.NewConfigFromFlag("load")),
 ```
 
 The code above will use the "load" string as a flag name to get the file name of
@@ -649,7 +662,7 @@ the "load" flag used would also have to be defined on the command flags in order
 for this code snippet to work.
 
 Currently only YAML and JSON files are supported but developers can add support
-for other input sources by implementing the altsrc.InputSourceContext for their
+for other input sources by implementing the cli.InputSourceContext for their
 given sources.
 
 Here is a more complete sample of a command using YAML support:
@@ -670,18 +683,16 @@ import (
 )
 
 func main() {
-  flags := []cli.Flag{
-    &cli.IntFlag{Name: "test"},
-    &cli.StringFlag{Name: "load"},
-  }
-
   app := &cli.App{
     Action: func(c *cli.Context) error {
       fmt.Println("yaml ist rad")
       return nil
     },
-    Before: altsrc.InitInputSourceWithContext(flags, altsrc.NewYamlSourceFromFlagFunc("load")),
-    Flags: flags,
+    Before: cli.InitAllInputSource(altsrc.NewConfigFromFlag("load")),
+    Flags: []cli.Flag{
+      &cli.IntFlag{Name: "test"},
+      &cli.StringFlag{Name: "load"},
+    },
   }
 
   app.Run(os.Args)
@@ -693,7 +704,7 @@ func main() {
 You can make a flag required by setting the `Required` field to `true`. If a user
 does not provide a required flag, they will be shown an error message.
 
-Take for example this app that reqiures the `lang` flag:
+Take for example this app that requires the `lang` flag:
 
 <!-- {
   "error": "Required flag \"lang\" not set"
