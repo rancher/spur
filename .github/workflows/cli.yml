@@ -25,22 +25,27 @@ jobs:
           echo "::add-path::$(dirname $GITHUB_WORKSPACE)/bin"
         shell: bash
 
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v1
         with:
           ref: ${{ github.ref }}
 
-      - name: GOFMT Check
+      - name: Generate & format check
         if: matrix.go == 1.14 && matrix.os == 'ubuntu-latest'
-        run: test -z $(gofmt -l .)
+        run: |
+          go generate
+          modified="$(git status --porcelain)"
+          echo "$modified" >&2
+          test -z "$modified"
+          test -z $(gofmt -l .)
 
-      - name: vet
+      - name: Vet
         run: go run cli/internal/build/build.go vet
 
-      - name: test
+      - name: Test
         run: go run cli/internal/build/build.go test -tags docgen
 
-      - name: check-binary-size
+      - name: Check binary size
         run: |
           go run cli/internal/build/build.go check-binary-size
           go run cli/internal/build/build.go check-binary-size -tags docgen
@@ -74,19 +79,19 @@ jobs:
           echo "::add-path::$(dirname $GITHUB_WORKSPACE)/bin"
         shell: bash
 
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v1
         with:
           ref: ${{ github.ref }}
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           mkdir -p $GOPATH/bin
           curl -L -o $GOPATH/bin/gfmrun "https://github.com/urfave/gfmrun/releases/download/v1.2.14/gfmrun-$(go env GOOS)-amd64-v1.2.14"
           chmod +x $GOPATH/bin/gfmrun
           npm install -g markdown-toc@1.2.0
 
-      - name: Run Tests
+      - name: Run tests
         run: |
           go run cli/internal/build/build.go gfmrun docs/README.md
           go run cli/internal/build/build.go toc docs/README.md
