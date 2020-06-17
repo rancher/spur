@@ -2,7 +2,7 @@ spur/cli
 ===
 
 [![GoDoc](https://godoc.org/github.com/rancher/spur/cli?status.svg)](https://godoc.org/github.com/rancher/spur/cli)
-[![Go Report Card](https://goreportcard.com/badge/rancher/spur)](https://goreportcard.com/report/rancher/spur)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rancher/spur)](https://goreportcard.com/report/github.com/rancher/spur)
 [![codecov](https://codecov.io/gh/rancher/spur/branch/trunk/graph/badge.svg)](https://codecov.io/gh/rancher/spur)
 
 This project is a fork of [urfave/cli/v2](https://github.com/urfave/cli).
