@@ -9,7 +9,7 @@ import (
 	"github.com/rancher/spur/flag"
 )
 
-func TestCommandYamlFileTest(t *testing.T) {
+func TestConfigFileTest(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte("test: 15"), 0666)
@@ -39,7 +39,91 @@ func TestCommandYamlFileTest(t *testing.T) {
 	expect(t, err, nil)
 }
 
-func TestCommandYamlFileTestGlobalEnvVarWins(t *testing.T) {
+func TestConfigNoFileTest(t *testing.T) {
+	app := &cli.App{}
+	set := flag.NewFlagSet("test", 0)
+	test := []string{"test-cmd", "--load", ".doesNotExist.yaml"}
+	set.Parse(test)
+
+	c := cli.NewContext(app, set, nil)
+
+	command := &cli.Command{
+		Name:        "test-cmd",
+		Aliases:     []string{"tc"},
+		Usage:       "this is for testing",
+		Description: "testing",
+		Flags: []cli.Flag{
+			&cli.IntFlag{Name: "test"},
+			&cli.StringFlag{Name: "load"}},
+	}
+	command.Before = cli.InitAllInputSource(NewConfigFromFlag("load"))
+	err := command.Run(c)
+
+	refute(t, err, nil)
+}
+
+func TestConfigDefaultFileTest(t *testing.T) {
+	app := &cli.App{}
+	set := flag.NewFlagSet("test", 0)
+	ioutil.WriteFile("current.yaml", []byte("test: 15"), 0666)
+	defer os.Remove("current.yaml")
+	test := []string{"test-cmd"}
+	set.Parse(test)
+
+	c := cli.NewContext(app, set, nil)
+
+	command := &cli.Command{
+		Name:        "test-cmd",
+		Aliases:     []string{"tc"},
+		Usage:       "this is for testing",
+		Description: "testing",
+		Action: func(c *cli.Context) error {
+			val := c.Int("test")
+			expect(t, val, 15)
+			return nil
+		},
+		Flags: []cli.Flag{
+			&cli.IntFlag{Name: "test"},
+			&cli.StringFlag{
+				Name:  "load",
+				Value: "current.yaml",
+			}},
+	}
+	command.Before = cli.InitAllInputSource(NewConfigFromFlag("load"))
+	err := command.Run(c)
+
+	expect(t, err, nil)
+}
+
+func TestConfigDefaultInvalidFileTest(t *testing.T) {
+	app := &cli.App{}
+	set := flag.NewFlagSet("test", 0)
+	ioutil.WriteFile("current.yaml", []byte("test: [15"), 0666)
+	defer os.Remove("current.yaml")
+	test := []string{"test-cmd"}
+	set.Parse(test)
+
+	c := cli.NewContext(app, set, nil)
+
+	command := &cli.Command{
+		Name:        "test-cmd",
+		Aliases:     []string{"tc"},
+		Usage:       "this is for testing",
+		Description: "testing",
+		Flags: []cli.Flag{
+			&cli.IntFlag{Name: "test"},
+			&cli.StringFlag{
+				Name:  "load",
+				Value: "current.yaml",
+			}},
+	}
+	command.Before = cli.InitAllInputSource(NewConfigFromFlag("load"))
+	err := command.Run(c)
+
+	refute(t, err, nil)
+}
+
+func TestConfigFileTestGlobalEnvVarWins(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte("test: 15"), 0666)
@@ -73,7 +157,7 @@ func TestCommandYamlFileTestGlobalEnvVarWins(t *testing.T) {
 	expect(t, err, nil)
 }
 
-func TestCommandYamlFileTestGlobalEnvVarWinsNested(t *testing.T) {
+func TestConfigFileTestGlobalEnvVarWinsNested(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte(`top:
@@ -108,7 +192,7 @@ func TestCommandYamlFileTestGlobalEnvVarWinsNested(t *testing.T) {
 	expect(t, err, nil)
 }
 
-func TestCommandYamlFileTestSpecifiedFlagWins(t *testing.T) {
+func TestConfigFileTestSpecifiedFlagWins(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte("test: 15"), 0666)
@@ -140,7 +224,7 @@ func TestCommandYamlFileTestSpecifiedFlagWins(t *testing.T) {
 	expect(t, err, nil)
 }
 
-func TestCommandYamlFileTestSpecifiedFlagWinsNested(t *testing.T) {
+func TestConfigFileTestSpecifiedFlagWinsNested(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte(`top:
@@ -173,7 +257,7 @@ func TestCommandYamlFileTestSpecifiedFlagWinsNested(t *testing.T) {
 	expect(t, err, nil)
 }
 
-func TestCommandYamlFileTestDefaultValueFileWins(t *testing.T) {
+func TestConfigFileTestDefaultValueFileWins(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte("test: 15"), 0666)
@@ -205,7 +289,7 @@ func TestCommandYamlFileTestDefaultValueFileWins(t *testing.T) {
 	expect(t, err, nil)
 }
 
-func TestCommandYamlFileTestDefaultValueFileWinsNested(t *testing.T) {
+func TestConfigFileTestDefaultValueFileWinsNested(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte(`top:
@@ -238,7 +322,7 @@ func TestCommandYamlFileTestDefaultValueFileWinsNested(t *testing.T) {
 	expect(t, err, nil)
 }
 
-func TestCommandYamlFileFlagHasDefaultGlobalEnvYamlSetGlobalEnvWins(t *testing.T) {
+func TestConfigFileFlagHasDefaultGlobalEnvSetGlobalEnvWins(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte("test: 15"), 0666)
@@ -272,7 +356,7 @@ func TestCommandYamlFileFlagHasDefaultGlobalEnvYamlSetGlobalEnvWins(t *testing.T
 	expect(t, err, nil)
 }
 
-func TestCommandYamlFileFlagHasDefaultGlobalEnvYamlSetGlobalEnvWinsNested(t *testing.T) {
+func TestConfigFileFlagHasDefaultGlobalEnvSetGlobalEnvWinsNested(t *testing.T) {
 	app := &cli.App{}
 	set := flag.NewFlagSet("test", 0)
 	ioutil.WriteFile("current.yaml", []byte(`top:

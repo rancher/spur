@@ -20,21 +20,7 @@ func NewYamlSourceFromFile(file string) (cli.InputSourceContext, error) {
 	ysc := &yamlSourceContext{FilePath: file}
 	var results map[interface{}]interface{}
 	err := readCommandYaml(ysc.FilePath, &results)
-	if err != nil {
-		return nil, fmt.Errorf("unable to load yaml file '%s': %s", ysc.FilePath, err)
-	}
-	return &MapInputSource{file: file, valueMap: results}, nil
-}
-
-// NewConfigFromFlag creates a new Yaml cli.InputSourceContext from a provided flag name and source context.
-func NewConfigFromFlag(flagFileName string) func(*cli.Context) (cli.InputSourceContext, error) {
-	return func(ctx *cli.Context) (cli.InputSourceContext, error) {
-		filePath := ctx.String(flagFileName)
-		if isc, err := NewYamlSourceFromFile(filePath); err == nil || ctx.IsSet(flagFileName) {
-			return isc, err
-		}
-		return &MapInputSource{}, nil
-	}
+	return &MapInputSource{file: file, valueMap: results}, err
 }
 
 func readCommandYaml(filePath string, container interface{}) error {
@@ -64,7 +50,7 @@ func loadDataFrom(filePath string) ([]byte, error) {
 		}
 	}
 	if _, err := os.Stat(filePath); err != nil {
-		return nil, fmt.Errorf("cannot read from file: '%s' because it does not exist", filePath)
+		return nil, os.ErrNotExist
 	}
 	return ioutil.ReadFile(filePath)
 }
