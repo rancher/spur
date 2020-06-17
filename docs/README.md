@@ -1,8 +1,7 @@
 spur/cli
 ===
 
-[![GoDoc](https://godoc.org/github.com/rancher/spur?status.svg)](https://godoc.org/github.com/rancher/spur)
-[![codebeat](https://codebeat.co/badges/0a8f30aa-f975-404b-b878-5fab3ae1cc5f)](https://codebeat.co/projects/github-com-rancher-spur)
+[![GoDoc](https://godoc.org/github.com/rancher/spur/cli?status.svg)](https://godoc.org/github.com/rancher/spur/cli)
 [![Go Report Card](https://goreportcard.com/badge/rancher/spur)](https://goreportcard.com/report/rancher/spur)
 [![codecov](https://codecov.io/gh/rancher/spur/branch/trunk/graph/badge.svg)](https://codecov.io/gh/rancher/spur)
 
@@ -35,6 +34,8 @@ import (
 cli is tested against multiple versions of Go on Linux, and against the latest
 released version of Go on OS X and Windows. This project uses Github Actions for
 builds. To see our currently supported go versions and platforms, look at the [./.github/workflows/cli.yml](https://github.com/rancher/spur/blob/trunk/.github/workflows/cli.yml).
+
+## Table of Contents
 
 <!-- toc -->
 
